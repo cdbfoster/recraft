@@ -23,20 +23,39 @@ package recraft.core;
 
 import recraft.util.IntVector3;
 
+/** The TerrainChunk interface abstracts the storage of Blocks and Biomes and is intended for use as
+ * a transfer medium between Terrain objects and TerrainProvider objects.  All given locations should be
+ * expected to be local to the TerrainChunk's origin.*/
 public interface TerrainChunk
 {
+	//XXX Add updating facilities to TerrainChunk? Yes, probably.
+
+	/** Instructs the Terrain object to represent the given block at the given location.  TerrainChunk objects
+	 * should be aware of Block's requiresConstantUpdate method. */
 	boolean setBlock(IntVector3 location, Block block);
+
+	/** Returns the Block at the given location in the TerrainChunk object.  For safety reasons, any modifications
+	 * should be made to a clone of the returned Block (with Block's cloneBlock method) and then set back into
+	 * the TerrainChunk object with its setBlock method. */
 	Block getBlock(IntVector3 location);
 
-	// Fix these: Do not work with IDs, work with objects that can tell you IDs.  And do not return bytes.
-	byte setBiome(IntVector3 location, byte biomeID);
-	byte getBiome(IntVector3 location);
+	/** Instructs the TerrainChunk object to represent the given biome at the given location. */
+	boolean setBiome(IntVector3 location, Biome biome);
 
+	/** Returns the Biome at the given location in the TerrainChunk object.  Be aware that multiple
+	 * locations in the TerrainChunk object may share this Biome object. */
+	Biome getBiome(IntVector3 location);
+
+	/** Returns the TerrainChunk's origin. */
 	IntVector3 getOrigin();
 
+	/** Returns true if the specified location is represented by the TerrainChunk object. */
 	boolean containsLocation(IntVector3 location);
 
+	/** Returns the size of the TerrainChunk on the X axis. */
 	int getSizeX();
+	/** Returns the size of the TerrainChunk on the Y axis. */
 	int getSizeY();
+	/** Returns the size of the TerrainChunk on the Z axis. */
 	int getSizeZ();
 }

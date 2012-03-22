@@ -23,6 +23,8 @@ package recraft.core;
 
 import recraft.util.IntVector3;
 
+/** The TerrainProvider interface abstracts the source of a particular game world.  The source could be
+ * anything: loaded from disk, generated on the fly, recieved from the network, etc.*/
 public interface TerrainProvider
 {
 	// If a TerrainProvider needs to copy from an existing Terrain, it should take
