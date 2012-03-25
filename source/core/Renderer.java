@@ -25,6 +25,5 @@ import recraft.util.AutoArrayList;
 
 public interface Renderer
 {
-	public static final AutoArrayList<Renderer> registry = new AutoArrayList<Renderer>(2);
 
 }

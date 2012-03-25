@@ -31,8 +31,6 @@ import recraft.util.IntVector3;
  * method. */
 public interface Terrain
 {
-	public static final AutoArrayList<Terrain> registry = new AutoArrayList<Terrain>(5);
-
 	/** Instructs the Terrain object to represent the given block at the given location.  Terrain objects
 	 * should be aware of Block's requiresConstantUpdate method. */
 	boolean setBlock(IntVector3 location, Block block);

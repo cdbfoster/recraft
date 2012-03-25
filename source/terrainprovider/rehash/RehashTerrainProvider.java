@@ -19,13 +19,19 @@
  *                                                                              *
  ********************************************************************************/
 
-package recraft.core;
+package recraft.terrainprovider.rehash;
 
-public interface Library
+import recraft.core.TerrainChunk;
+import recraft.core.TerrainProvider;
+import recraft.util.IntVector3;
+
+public class RehashTerrainProvider implements TerrainProvider
 {
-	void registerBiomes(boolean overwriteExisting);
-	void registerBiome(int id, boolean overwriteExisting);
 
-	void registerBlocks(boolean overwriteExisting);
-	void registerBlock(int id, boolean overwriteExisting);
+	@Override
+	public TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size)
+	{
+		return null;
+	}
+
 }

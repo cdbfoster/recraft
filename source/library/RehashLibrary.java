@@ -29,94 +29,29 @@ public class RehashLibrary implements Library
 {
 	public static final AutoArrayList<Biome> biomeRegistry = new AutoArrayList<Biome>(10);
 	public static final AutoArrayList<Block> blockRegistry = new AutoArrayList<Block>(256);
-	public static final AutoArrayList<Renderer> rendererRegistry = new AutoArrayList<Renderer>(1);
-	public static final AutoArrayList<Terrain> terrainRegistry = new AutoArrayList<Terrain>(1);
-	public static final AutoArrayList<TerrainChunk> terrainChunkRegistry = new AutoArrayList<TerrainChunk>(1);
-	public static final AutoArrayList<TerrainProvider> terrainProviderRegistry = new AutoArrayList<TerrainProvider>(2);
-	public static final AutoArrayList<World> worldRegistry = new AutoArrayList<World>(1);
 
 	@Override
 	public void registerBiomes(boolean overwriteExisting)
 	{
-		conditionalWrite(biomeRegistry, Biome.registry, overwriteExisting);
+		this.conditionalWrite(biomeRegistry, Biome.registry, overwriteExisting);
 	}
 
 	@Override
 	public void registerBiome(int id, boolean overwriteExisting)
 	{
-		conditionalWrite(biomeRegistry, id, Biome.registry, overwriteExisting);
+		this.conditionalWrite(biomeRegistry, id, Biome.registry, overwriteExisting);
 	}
 
 	@Override
 	public void registerBlocks(boolean overwriteExisting)
 	{
-		conditionalWrite(blockRegistry, Block.registry, overwriteExisting);
+		this.conditionalWrite(blockRegistry, Block.registry, overwriteExisting);
 	}
 
 	@Override
 	public void registerBlock(int id, boolean overwriteExisting)
 	{
-		conditionalWrite(blockRegistry, id, Block.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerRenderers(boolean overwriteExisting)
-	{
-		conditionalWrite(rendererRegistry, Renderer.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerRenderer(int id, boolean overwriteExisting)
-	{
-		conditionalWrite(rendererRegistry, id, Renderer.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrains(boolean overwriteExisting)
-	{
-		conditionalWrite(terrainRegistry, Terrain.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrain(int id, boolean overwriteExisting)
-	{
-		conditionalWrite(terrainRegistry, id, Terrain.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrainChunks(boolean overwriteExisting)
-	{
-		conditionalWrite(terrainChunkRegistry, TerrainChunk.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrainChunk(int id, boolean overwriteExisting)
-	{
-		conditionalWrite(terrainChunkRegistry, id, TerrainChunk.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrainProviders(boolean overwriteExisting)
-	{
-		conditionalWrite(terrainProviderRegistry, TerrainProvider.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerTerrainProvider(int id, boolean overwriteExisting)
-	{
-		conditionalWrite(terrainProviderRegistry, id, TerrainProvider.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerWorlds(boolean overwriteExisting)
-	{
-		conditionalWrite(worldRegistry, World.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerWorld(int id, boolean overwriteExisting)
-	{
-		conditionalWrite(worldRegistry, id, World.registry, overwriteExisting);
+		this.conditionalWrite(blockRegistry, id, Block.registry, overwriteExisting);
 	}
 
 	private boolean targetExists(AutoArrayList list, int index)
@@ -132,7 +67,7 @@ public class RehashLibrary implements Library
 			if (overwriteExisting)
 				destination.set(index, source.get(index));
 			else
-				if (!targetExists(destination, index))
+				if (!this.targetExists(destination, index))
 					destination.set(index, source.get(index));
 		}
 	}
@@ -142,7 +77,7 @@ public class RehashLibrary implements Library
 		if (overwriteExisting)
 			destination.set(sourceIndex, source.get(sourceIndex));
 		else
-			if (!targetExists(destination, sourceIndex))
+			if (!this.targetExists(destination, sourceIndex))
 				destination.set(sourceIndex, source.get(sourceIndex));
 	}
 
@@ -160,14 +95,6 @@ public class RehashLibrary implements Library
 		/*  3*/	blockRegistry.set(DirtBlock.id, new DirtBlock());
 		/*  7*/	blockRegistry.set(BedrockBlock.id, new BedrockBlock());
 
-		// Initialize Renderer List
-
-		// Initialize Terrain List
-
-		// Initialize TerrainChunk List
-
-		// Initialize TerrainProvider List
-
-		// Initialize World List
+		// Initialize other stuff like items, maybe mobs.. etc.
 	}
 }

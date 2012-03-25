@@ -28,7 +28,6 @@ import recraft.util.IntVector3;
  * anything: loaded from disk, generated on the fly, received from the network, etc.*/
 public interface TerrainProvider
 {
-	public static final AutoArrayList<TerrainProvider> registry = new AutoArrayList<TerrainProvider>(5);
 	// If a TerrainProvider needs to copy from an existing Terrain, it should take
 	// the object in its constructor.
 

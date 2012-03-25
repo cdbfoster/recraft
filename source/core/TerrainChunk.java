@@ -29,10 +29,6 @@ import recraft.util.IntVector3;
  * expected to be local to the TerrainChunk's origin.*/
 public interface TerrainChunk
 {
-	public static final AutoArrayList<TerrainChunk> registry = new AutoArrayList<TerrainChunk>(5);
-
-	//XXX Add updating facilities to TerrainChunk? Yes, probably.
-
 	/** Instructs the Terrain object to represent the given block at the given location.  TerrainChunk objects
 	 * should be aware of Block's requiresConstantUpdate method. */
 	boolean setBlock(IntVector3 location, Block block);
