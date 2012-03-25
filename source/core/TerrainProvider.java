@@ -21,7 +21,6 @@
 
 package recraft.core;
 
-import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The TerrainProvider interface abstracts the source of a particular game world.  The source could be

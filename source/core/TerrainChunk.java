@@ -21,7 +21,6 @@
 
 package recraft.core;
 
-import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The TerrainChunk interface abstracts the storage of Blocks and Biomes and is intended for use as

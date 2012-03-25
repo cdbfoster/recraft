@@ -23,7 +23,6 @@ package recraft.core;
 
 import java.util.HashMap;
 
-import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The Terrain interface abstracts the storage of Blocks and Biomes. All terrain-related queries should be

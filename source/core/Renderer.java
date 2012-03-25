@@ -21,8 +21,6 @@
 
 package recraft.core;
 
-import recraft.util.AutoArrayList;
-
 public interface Renderer
 {
 
