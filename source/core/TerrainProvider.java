@@ -21,12 +21,14 @@
 
 package recraft.core;
 
+import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The TerrainProvider interface abstracts the source of a particular game world.  The source could be
  * anything: loaded from disk, generated on the fly, received from the network, etc.*/
-public interface TerrainProvider
+public interface TerrainProvider extends IDless
 {
+	public static final AutoArrayList<TerrainProvider> registry = new AutoArrayList<TerrainProvider>(2);
 	// If a TerrainProvider needs to copy from an existing Terrain, it should take
 	// the object in its constructor.
 

@@ -23,13 +23,16 @@ package recraft.core;
 
 import java.util.HashMap;
 
+import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The Terrain interface abstracts the storage of Blocks and Biomes. All terrain-related queries should be
  * made through this interface. This interface also handles Block updating through scheduling and its update
  * method. */
-public interface Terrain
+public interface Terrain extends IDless
 {
+	public static final AutoArrayList<Terrain> registry = new AutoArrayList<Terrain>(2);
+
 	/** Instructs the Terrain object to represent the given block at the given location.  Terrain objects
 	 * should be aware of Block's requiresConstantUpdate method. */
 	boolean setBlock(IntVector3 location, Block block);

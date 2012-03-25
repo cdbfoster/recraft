@@ -23,78 +23,29 @@ package recraft.library;
 
 import recraft.block.rehash.*;
 import recraft.core.*;
+import recraft.terrainprovider.rehash.*;
 import recraft.util.AutoArrayList;
 
-public class RehashLibrary implements Library
+public class RehashLibrary extends Library
 {
-	public static final AutoArrayList<Biome> biomeRegistry = new AutoArrayList<Biome>(10);
-	public static final AutoArrayList<Block> blockRegistry = new AutoArrayList<Block>(256);
-
-	@Override
-	public void registerBiomes(boolean overwriteExisting)
+	public RehashLibrary()
 	{
-		this.conditionalWrite(biomeRegistry, Biome.registry, overwriteExisting);
-	}
+		super();
 
-	@Override
-	public void registerBiome(int id, boolean overwriteExisting)
-	{
-		this.conditionalWrite(biomeRegistry, id, Biome.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerBlocks(boolean overwriteExisting)
-	{
-		this.conditionalWrite(blockRegistry, Block.registry, overwriteExisting);
-	}
-
-	@Override
-	public void registerBlock(int id, boolean overwriteExisting)
-	{
-		this.conditionalWrite(blockRegistry, id, Block.registry, overwriteExisting);
-	}
-
-	private boolean targetExists(AutoArrayList list, int index)
-	{
-		return (list.get(index) != null);
-	}
-
-	private void conditionalWrite(AutoArrayList source, AutoArrayList destination, boolean overwriteExisting)
-	{
-		int size = source.size();
-		for (int index = 0; index < size; index++)
-		{
-			if (overwriteExisting)
-				destination.set(index, source.get(index));
-			else
-				if (!this.targetExists(destination, index))
-					destination.set(index, source.get(index));
-		}
-	}
-
-	private void conditionalWrite(AutoArrayList source, int sourceIndex, AutoArrayList destination, boolean overwriteExisting)
-	{
-		if (overwriteExisting)
-			destination.set(sourceIndex, source.get(sourceIndex));
-		else
-			if (!this.targetExists(destination, sourceIndex))
-				destination.set(sourceIndex, source.get(sourceIndex));
-	}
-
-	static
-	{
-		// Initialize Biome List
-
-		// Initialize Block List
-		for (int index = 0; index < 256; index++)
-			blockRegistry.add(null);
-
+		// Initialize Block Registry
+		LibrarySet<Block> blockRegistry = new LibrarySet<Block>(new AutoArrayList<Block>(256), Block.registry);
 		/*  0*/	blockRegistry.set(AirBlock.id, new AirBlock());
 		/*  1*/	blockRegistry.set(StoneBlock.id, new StoneBlock());
 		/*  2*/	blockRegistry.set(GrassBlock.id, new GrassBlock());
 		/*  3*/	blockRegistry.set(DirtBlock.id, new DirtBlock());
 		/*  7*/	blockRegistry.set(BedrockBlock.id, new BedrockBlock());
 
-		// Initialize other stuff like items, maybe mobs.. etc.
+		// Initialize Terrain Provider Registry
+		LibrarySet<TerrainProvider> terrainProviderRegistry = new LibrarySet<TerrainProvider>(new AutoArrayList<TerrainProvider>(2), TerrainProvider.registry);
+		/*  0*/	terrainProviderRegistry.set(0, new RehashTerrainProvider()); // TODO Outfit each core interface with a new() method and standardize arguments for each type.
+
+		// Register the sets with the library.
+		this.librarySets.put(knownSetNames.get(SET_BLOCK), blockRegistry);
+		this.librarySets.put(knownSetNames.get(SET_TERRAIN_PROVIDER), terrainProviderRegistry);
 	}
 }

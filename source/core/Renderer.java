@@ -21,7 +21,11 @@
 
 package recraft.core;
 
-public interface Renderer
+import recraft.util.AutoArrayList;
+
+public interface Renderer extends IDless
 {
+	public static final AutoArrayList<Renderer> registry = new AutoArrayList<Renderer>(2);
+
 
 }

@@ -26,7 +26,7 @@ import recraft.util.IntVector3;
 /** The TerrainChunk interface abstracts the storage of Blocks and Biomes and is intended for use as
  * a transfer medium between Terrain objects and TerrainProvider objects.  All given locations should be
  * expected to be local to the TerrainChunk's origin.*/
-public interface TerrainChunk
+public interface TerrainChunk extends IDless
 {
 	/** Instructs the Terrain object to represent the given block at the given location.  TerrainChunk objects
 	 * should be aware of Block's requiresConstantUpdate method. */

@@ -21,7 +21,10 @@
 
 package recraft.core;
 
-public interface World
+import recraft.util.AutoArrayList;
+
+public interface World extends IDless
 {
+	public static final AutoArrayList<World> registry = new AutoArrayList<World>(2);
 
 }
