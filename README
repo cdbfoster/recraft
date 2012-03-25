@@ -1,0 +1,21 @@
+
+    Recraft: The Minecraft Restructure Project
+
+    The goal of this project is to create a more moddable 
+Minecraft without relying on a limited mod-API that hides
+the insides of Minecraft -- Minecraft should be written as
+an API into itself.  The Recraft project attempts to accomplish
+this through an object-oriented design by implementing Minecraft
+as a variety of objects communicating through common interfaces,
+thus abstracting individual implementations.  The result is
+a more easily extensible, maintainable program to serve as a
+base for modding.
+
+    Recraft's structure is inspired by PBRT (www.pbrt.org).
+
+    Recraft is released under the GNU GPL.  Please see the
+file COPYING for the full license.
+
+    Installation instructions to come.
+
+    Copyright 2012 Chris Foster
