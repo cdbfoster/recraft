@@ -22,12 +22,15 @@
 package recraft.core;
 
 import java.lang.String;
-import java.util.ArrayList;
 
+import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
+/** The block interface provides access to all common block features. */
 public interface Block
 {
+	static final AutoArrayList<Block> registry = new AutoArrayList<Block>(256);
+
 	/** Returns the block's ID number. */
 	int getID();
 

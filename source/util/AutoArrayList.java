@@ -19,34 +19,41 @@
  *                                                                              *
  ********************************************************************************/
 
-package recraft.core;
+package recraft.util;
 
 import java.util.ArrayList;
 
-import recraft.util.AutoArrayList;
-import recraft.util.IntVector3;
-
-/** Used by terrain generators to implement climate/region specific features.  Terrain generators can use
- * a Biome's TerrainProvider capabilities to "sample" a region of a biome for contribution into the final
- * terrain.*/
-public interface Biome extends TerrainProvider
+/** An auto-expanding ArrayList class.  Calls to the set method will call ArrayList's add method until the
+ * list's size is large enough to contain the specified index. Calls to the get method that specify an index
+ * greater than the list's size will not throw an exception, but instead return null. */
+public class AutoArrayList<E> extends ArrayList<E>
 {
-	static final AutoArrayList<Biome> registry = new AutoArrayList<Biome>(50);
+	public AutoArrayList()
+	{
+		super();
+	}
 
-	/** Returns the biome's ID number. */
-	int getID();
-
-	ArrayList getSpawnableCreatures(); // TODO Specify <Entity> at the end of ArrayList whenever we figure out what to do about mobs and stuff.
+	public AutoArrayList(int initialCapacity)
+	{
+		super(initialCapacity);
+	}
 
 	@Override
-	TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size);
+	public E get(int index)
+	{
+		if (index >= super.size())
+			return null;
+		return super.get(index);
+	}
 
-	// TODO Find out min and max range for temperature and write them in a comment here.
-	float getTemperature(IntVector3 location);
+	@Override
+	public E set(int index, E element)
+	{
+		super.ensureCapacity(index + 1);
 
-	// TODO Find out min and max range for humidity and write them in a comment here.
-	float getHumidity(IntVector3 location);
+		while (super.size() <= index)
+			super.add(null);
 
-	/** Returns a biome of the same type. */
-	Biome newBiome();
+		return super.set(index, element);
+	}
 }

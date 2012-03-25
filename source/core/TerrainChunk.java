@@ -21,6 +21,7 @@
 
 package recraft.core;
 
+import recraft.util.AutoArrayList;
 import recraft.util.IntVector3;
 
 /** The TerrainChunk interface abstracts the storage of Blocks and Biomes and is intended for use as
@@ -28,6 +29,8 @@ import recraft.util.IntVector3;
  * expected to be local to the TerrainChunk's origin.*/
 public interface TerrainChunk
 {
+	public static final AutoArrayList<TerrainChunk> registry = new AutoArrayList<TerrainChunk>(5);
+
 	//XXX Add updating facilities to TerrainChunk? Yes, probably.
 
 	/** Instructs the Terrain object to represent the given block at the given location.  TerrainChunk objects

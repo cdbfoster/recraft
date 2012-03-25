@@ -21,7 +21,10 @@
 
 package recraft.core;
 
+import recraft.util.AutoArrayList;
+
 public interface World
 {
+	public static final AutoArrayList<World> registry = new AutoArrayList<World>(3);
 
 }

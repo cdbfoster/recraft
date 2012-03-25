@@ -21,32 +21,26 @@
 
 package recraft.core;
 
-import java.util.ArrayList;
-
-import recraft.util.AutoArrayList;
-import recraft.util.IntVector3;
-
-/** Used by terrain generators to implement climate/region specific features.  Terrain generators can use
- * a Biome's TerrainProvider capabilities to "sample" a region of a biome for contribution into the final
- * terrain.*/
-public interface Biome extends TerrainProvider
+public interface Library
 {
-	static final AutoArrayList<Biome> registry = new AutoArrayList<Biome>(50);
+	void registerBiomes(boolean overwriteExisting);
+	void registerBiome(int id, boolean overwriteExisting);
 
-	/** Returns the biome's ID number. */
-	int getID();
+	void registerBlocks(boolean overwriteExisting);
+	void registerBlock(int id, boolean overwriteExisting);
 
-	ArrayList getSpawnableCreatures(); // TODO Specify <Entity> at the end of ArrayList whenever we figure out what to do about mobs and stuff.
+	void registerRenderers(boolean overwriteExisting);
+	void registerRenderer(int id, boolean overwriteExisting);
 
-	@Override
-	TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size);
+	void registerTerrains(boolean overwriteExisting);
+	void registerTerrain(int id, boolean overwriteExisting);
 
-	// TODO Find out min and max range for temperature and write them in a comment here.
-	float getTemperature(IntVector3 location);
+	void registerTerrainChunks(boolean overwriteExisting);
+	void registerTerrainChunk(int id, boolean overwriteExisting);
 
-	// TODO Find out min and max range for humidity and write them in a comment here.
-	float getHumidity(IntVector3 location);
+	void registerTerrainProviders(boolean overwriteExisting);
+	void registerTerrainProvider(int id, boolean overwriteExisting);
 
-	/** Returns a biome of the same type. */
-	Biome newBiome();
+	void registerWorlds(boolean overwriteExisting);
+	void registerWorld(int id, boolean overwriteExisting);
 }
