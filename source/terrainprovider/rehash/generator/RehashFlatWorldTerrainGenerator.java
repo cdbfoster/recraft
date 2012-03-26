@@ -30,7 +30,7 @@ public class RehashFlatWorldTerrainGenerator implements TerrainProvider
 				IntVector3 pos = new IntVector3(x, 0 - origin.y, z);
 
 				chunk.setBlock(new IntVector3(pos.x, pos.y + 3, pos.z), new GrassBlock());
-				chunk.setBlock(new IntVector3(pos.x, pos.y + 2, pos.z), new BedrockBlock());
+				chunk.setBlock(new IntVector3(pos.x, pos.y + 2, pos.z), new DirtBlock());
 				chunk.setBlock(new IntVector3(pos.x, pos.y + 1, pos.z), new DirtBlock());
 				chunk.setBlock(pos, new BedrockBlock());
 			}
