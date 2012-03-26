@@ -32,25 +32,19 @@ import recraft.util.IntVector3;
 public class RehashTerrainChunk implements TerrainChunk
 {
 	private final IntVector3 origin;
-
-	private final int sizeX;
-	private final int sizeY;
-	private final int sizeZ;
+	private final IntVector3 size;
 
 	private final short[] basicData;
 	private final HashMap<IntVector3, Block> extendedData;
 
 	private final HashSet<IntVector3> constantUpdateList;
 
-	public RehashTerrainChunk(IntVector3 origin, int sizeX, int sizeY, int sizeZ)
+	public RehashTerrainChunk(IntVector3 origin, IntVector3 size)
 	{
 		this.origin = origin;
+		this.size = size;
 
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
-		this.sizeZ = sizeZ;
-
-		this.basicData = new short[this.sizeX * this.sizeY * this.sizeZ];
+		this.basicData = new short[this.size.x * this.size.y * this.size.z];
 		this.extendedData = new HashMap<IntVector3, Block>();
 
 		this.constantUpdateList = new HashSet<IntVector3>();
@@ -112,39 +106,27 @@ public class RehashTerrainChunk implements TerrainChunk
 	}
 
 	@Override
+	public IntVector3 getSize()
+	{
+		return this.size;
+	}
+
+	@Override
 	public boolean containsLocation(IntVector3 location)
 	{
-		if (location.x < 0 || location.x >= this.sizeX)
+		if (location.x < 0 || location.x >= this.size.x)
 			return false;
-		if (location.y < 0 || location.y >= this.sizeY)
+		if (location.y < 0 || location.y >= this.size.y)
 			return false;
-		if (location.z < 0 || location.z >= this.sizeZ)
+		if (location.z < 0 || location.z >= this.size.z)
 			return false;
 
 		return true;
 	}
 
-	@Override
-	public int getSizeX()
-	{
-		return sizeX;
-	}
-
-	@Override
-	public int getSizeY()
-	{
-		return sizeY;
-	}
-
-	@Override
-	public int getSizeZ()
-	{
-		return sizeZ;
-	}
-
 	private int arrayIndex(IntVector3 location)
 	{
-		return location.x + this.sizeX * location.z + this.sizeX * this.sizeZ * location.y;
+		return location.x + this.size.x * location.z + this.size.x * this.size.z * location.y;
 	}
 
 }

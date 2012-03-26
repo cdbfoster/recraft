@@ -47,13 +47,9 @@ public interface TerrainChunk extends IDless
 	/** Returns the TerrainChunk's origin. */
 	IntVector3 getOrigin();
 
+	/** Returns the TerrainChunk's size on the three axes. */
+	IntVector3 getSize();
+
 	/** Returns true if the specified location is represented by the TerrainChunk object. */
 	boolean containsLocation(IntVector3 location);
-
-	/** Returns the size of the TerrainChunk on the X axis. */
-	int getSizeX();
-	/** Returns the size of the TerrainChunk on the Y axis. */
-	int getSizeY();
-	/** Returns the size of the TerrainChunk on the Z axis. */
-	int getSizeZ();
 }
