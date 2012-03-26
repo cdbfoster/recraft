@@ -41,6 +41,11 @@ public class RehashTerrainChunk implements TerrainChunk
 
 	public RehashTerrainChunk(IntVector3 origin, IntVector3 size)
 	{
+		if (origin == null)
+			origin = new IntVector3(0, 0, 0);
+		if (size == null)
+			size = new IntVector3(16, 256, 16);
+
 		this.origin = origin;
 		this.size = size;
 
