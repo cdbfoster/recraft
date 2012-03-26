@@ -32,20 +32,20 @@ public class RehashLibrary extends Library
 	{
 		super();
 
-		// Initialize Block Registry
-		LibrarySet<Block> blockRegistry = new LibrarySet<Block>(new AutoArrayList<Block>(256), Block.registry);
-		/*  0*/	blockRegistry.set(AirBlock.id, new AirBlock());
-		/*  1*/	blockRegistry.set(StoneBlock.id, new StoneBlock());
-		/*  2*/	blockRegistry.set(GrassBlock.id, new GrassBlock());
-		/*  3*/	blockRegistry.set(DirtBlock.id, new DirtBlock());
-		/*  7*/	blockRegistry.set(BedrockBlock.id, new BedrockBlock());
+		// Initialize Block Set
+		LibrarySet<Block> blockSet = new LibrarySet<Block>(new AutoArrayList<Block>(256), Block.registry);
+		/*  0*/	blockSet.set(AirBlock.id, new AirBlock());
+		/*  1*/	blockSet.set(StoneBlock.id, new StoneBlock());
+		/*  2*/	blockSet.set(GrassBlock.id, new GrassBlock());
+		/*  3*/	blockSet.set(DirtBlock.id, new DirtBlock());
+		/*  7*/	blockSet.set(BedrockBlock.id, new BedrockBlock());
 
-		// Initialize Terrain Provider Registry
-		LibrarySet<TerrainProvider> terrainProviderRegistry = new LibrarySet<TerrainProvider>(new AutoArrayList<TerrainProvider>(2), TerrainProvider.registry);
-		/*  0*/	terrainProviderRegistry.set(0, new RehashTerrainProvider()); // TODO Outfit each core interface with a new() method and standardize arguments for each type.
+		// Initialize Terrain Provider Set
+		LibrarySet<TerrainProvider> terrainProviderSet = new LibrarySet<TerrainProvider>(new AutoArrayList<TerrainProvider>(2), TerrainProvider.registry);
+		/*  0*/	terrainProviderSet.set(0, new RehashFlatWorldTerrainProvider());
 
-		// Register the sets with the library.
-		this.librarySets.put(knownSetNames.get(SET_BLOCK), blockRegistry);
-		this.librarySets.put(knownSetNames.get(SET_TERRAIN_PROVIDER), terrainProviderRegistry);
+		// Add the sets to the library.
+		this.librarySets.put(knownSetNames.get(SET_BLOCK), blockSet);
+		this.librarySets.put(knownSetNames.get(SET_TERRAIN_PROVIDER), terrainProviderSet);
 	}
 }

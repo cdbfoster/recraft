@@ -77,4 +77,6 @@ public interface Terrain extends IDless
 	/** Updates any Blocks requiring an update.  The Terrain object may also use the given world to determine
 	 * which parts of itself to keep in memory (For example: Based on proximity to players, etc.). */
 	void update(World world);
+
+	Terrain newTerrain(Settings settings);
 }

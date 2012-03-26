@@ -21,32 +21,76 @@
 
 package recraft.core;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-import recraft.util.AutoArrayList;
-import recraft.util.IntVector3;
-
-/** Used by terrain generators to implement climate/region specific features.  Terrain generators can use
- * a Biome's TerrainProvider capabilities to "sample" a region of a biome for contribution into the final
- * terrain.*/
-public interface Biome extends TerrainProvider
+public class Settings
 {
-	static final AutoArrayList<Biome> registry = new AutoArrayList<Biome>(50);
+	private HashMap<String, Object> fields;
 
-	/** Returns the biome's ID number. */
-	int getID();
+	public boolean containsField(String fieldName)
+	{
+		return this.fields.containsKey(fieldName);
+	}
 
-	ArrayList getSpawnableCreatures(); // TODO Specify <Entity> at the end of ArrayList whenever we figure out what to do about mobs and stuff.
+	public Object getObject(String fieldName)
+	{
+		return this.fields.get(fieldName);
+	}
 
-	@Override
-	TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size);
+	public int getInt(String fieldName)
+	{
+		Object object = this.fields.get(fieldName);
+		if (object == null || !(object instanceof Integer))
+			return 0;
+		return ((Integer)object).intValue();
+	}
 
-	// TODO This seems icky.  Is this where this stuff should go?
-	float getTemperature(IntVector3 location);
+	public float getFloat(String fieldName)
+	{
+		Object object = this.fields.get(fieldName);
+		if (object == null || !(object instanceof Float))
+			return 0.0f;
+		return ((Float)object).floatValue();
+	}
 
-	// TODO This seems icky.  Is this where this stuff should go?
-	float getHumidity(IntVector3 location);
+	public boolean getBoolean(String fieldName)
+	{
+		Object object = this.fields.get(fieldName);
+		if (object == null || !(object instanceof Boolean))
+			return false;
+		return ((Boolean)object).booleanValue();
+	}
 
-	/** Returns a biome of the same type. */
-	Biome newBiome();
+	public String getString(String fieldName)
+	{
+		Object object = this.fields.get(fieldName);
+		if (object == null || !(object instanceof String))
+			return null;
+		return (String)object;
+	}
+
+	public void setObject(String fieldName, Object value)
+	{
+		this.fields.put(fieldName, value);
+	}
+
+	public void setInt(String fieldName, int value)
+	{
+		this.fields.put(fieldName, new Integer(value));
+	}
+
+	public void setFloat(String fieldName, float value)
+	{
+		this.fields.put(fieldName, new Float(value));
+	}
+
+	public void setBoolean(String fieldName, boolean value)
+	{
+		this.fields.put(fieldName, new Boolean(value));
+	}
+
+	public void setString(String fieldName, String value)
+	{
+		this.fields.put(fieldName, value);
+	}
 }
