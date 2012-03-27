@@ -24,24 +24,29 @@ package recraft.terrainprovider.rehash;
 import recraft.core.Settings;
 import recraft.core.TerrainChunk;
 import recraft.core.TerrainProvider;
+import recraft.terrainprovider.rehash.generator.RehashFlatWorldTerrainGenerator;
 import recraft.util.IntVector3;
 
 public class RehashFlatWorldTerrainProvider implements TerrainProvider
 {
+	//private TerrainProvider terrainLoader;
+	private TerrainProvider terrainGenerator;
+
 	public RehashFlatWorldTerrainProvider()
 	{
-
 	}
 
 	public RehashFlatWorldTerrainProvider(Settings settings)
 	{
+		this();
 
+		this.terrainGenerator = new RehashFlatWorldTerrainGenerator(settings);
 	}
 
 	@Override
 	public TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size)
 	{
-		return null;
+		return this.terrainGenerator.provideTerrain(origin, size);
 	}
 
 	@Override
