@@ -22,7 +22,7 @@
 package recraft.terrainprovider.rehash.generator;
 
 import recraft.block.rehash.*;
-import recraft.core.Settings;
+import recraft.core.Properties;
 import recraft.core.TerrainChunk;
 import recraft.core.TerrainProvider;
 import recraft.terrainchunk.rehash.RehashTerrainChunk;
@@ -30,7 +30,7 @@ import recraft.util.IntVector3;
 
 public class RehashFlatWorldTerrainGenerator implements TerrainProvider
 {
-	public RehashFlatWorldTerrainGenerator(Settings settings)
+	public RehashFlatWorldTerrainGenerator(Properties settings)
 	{
 
 	}
@@ -60,7 +60,7 @@ public class RehashFlatWorldTerrainGenerator implements TerrainProvider
 	}
 
 	@Override
-	public TerrainProvider newTerrainProvider(Settings settings)
+	public TerrainProvider newTerrainProvider(Properties settings)
 	{
 		return new RehashFlatWorldTerrainGenerator(settings);
 	}

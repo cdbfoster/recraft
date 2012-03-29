@@ -33,5 +33,5 @@ public interface TerrainProvider extends IDless
 	/** Returns a TerrainChunk containing the terrain described by origin and size. */
 	TerrainChunk provideTerrain(IntVector3 origin, IntVector3 size);
 
-	TerrainProvider newTerrainProvider(Settings settings);
+	TerrainProvider newTerrainProvider(Properties settings);
 }

@@ -21,7 +21,7 @@
 
 package recraft.terrainprovider.rehash;
 
-import recraft.core.Settings;
+import recraft.core.Properties;
 import recraft.core.TerrainChunk;
 import recraft.core.TerrainProvider;
 import recraft.terrainprovider.rehash.generator.RehashFlatWorldTerrainGenerator;
@@ -36,7 +36,7 @@ public class RehashFlatWorldTerrainProvider implements TerrainProvider
 	{
 	}
 
-	public RehashFlatWorldTerrainProvider(Settings settings)
+	public RehashFlatWorldTerrainProvider(Properties settings)
 	{
 		this();
 
@@ -50,7 +50,7 @@ public class RehashFlatWorldTerrainProvider implements TerrainProvider
 	}
 
 	@Override
-	public TerrainProvider newTerrainProvider(Settings settings)
+	public TerrainProvider newTerrainProvider(Properties settings)
 	{
 		return new RehashFlatWorldTerrainProvider(settings);
 	}

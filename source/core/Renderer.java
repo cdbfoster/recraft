@@ -27,5 +27,5 @@ public interface Renderer extends IDless
 {
 	public static final AutoArrayList<Renderer> registry = new AutoArrayList<Renderer>(2);
 
-	Renderer newRenderer(Settings settings);
+	Renderer newRenderer(Properties settings);
 }

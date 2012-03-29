@@ -23,23 +23,23 @@ package recraft.core;
 
 import java.util.HashMap;
 
-public class Settings
+public class Properties
 {
-	private HashMap<String, Object> fields;
+	private HashMap<String, Object> properties;
 
 	public boolean containsField(String fieldName)
 	{
-		return this.fields.containsKey(fieldName);
+		return this.properties.containsKey(fieldName);
 	}
 
 	public Object getObject(String fieldName)
 	{
-		return this.fields.get(fieldName);
+		return this.properties.get(fieldName);
 	}
 
 	public int getInt(String fieldName)
 	{
-		Object object = this.fields.get(fieldName);
+		Object object = this.properties.get(fieldName);
 		if (object == null || !(object instanceof Integer))
 			return 0;
 		return ((Integer)object).intValue();
@@ -47,7 +47,7 @@ public class Settings
 
 	public float getFloat(String fieldName)
 	{
-		Object object = this.fields.get(fieldName);
+		Object object = this.properties.get(fieldName);
 		if (object == null || !(object instanceof Float))
 			return 0.0f;
 		return ((Float)object).floatValue();
@@ -55,7 +55,7 @@ public class Settings
 
 	public boolean getBoolean(String fieldName)
 	{
-		Object object = this.fields.get(fieldName);
+		Object object = this.properties.get(fieldName);
 		if (object == null || !(object instanceof Boolean))
 			return false;
 		return ((Boolean)object).booleanValue();
@@ -63,7 +63,7 @@ public class Settings
 
 	public String getString(String fieldName)
 	{
-		Object object = this.fields.get(fieldName);
+		Object object = this.properties.get(fieldName);
 		if (object == null || !(object instanceof String))
 			return null;
 		return (String)object;
@@ -71,26 +71,26 @@ public class Settings
 
 	public void setObject(String fieldName, Object value)
 	{
-		this.fields.put(fieldName, value);
+		this.properties.put(fieldName, value);
 	}
 
 	public void setInt(String fieldName, int value)
 	{
-		this.fields.put(fieldName, new Integer(value));
+		this.properties.put(fieldName, new Integer(value));
 	}
 
 	public void setFloat(String fieldName, float value)
 	{
-		this.fields.put(fieldName, new Float(value));
+		this.properties.put(fieldName, new Float(value));
 	}
 
 	public void setBoolean(String fieldName, boolean value)
 	{
-		this.fields.put(fieldName, new Boolean(value));
+		this.properties.put(fieldName, new Boolean(value));
 	}
 
 	public void setString(String fieldName, String value)
 	{
-		this.fields.put(fieldName, value);
+		this.properties.put(fieldName, value);
 	}
 }

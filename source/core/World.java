@@ -27,5 +27,5 @@ public interface World extends IDless
 {
 	public static final AutoArrayList<World> registry = new AutoArrayList<World>(2);
 
-	World newWorld(Settings settings);
+	World newWorld(Properties settings);
 }
