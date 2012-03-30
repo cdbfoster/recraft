@@ -31,6 +31,7 @@ import recraft.util.IntVector3;
 
 public class RehashTerrainChunk implements TerrainChunk
 {
+	public static final IntVector3 defaultSize = new IntVector3(16, 256, 16);
 	private final IntVector3 size;
 
 	private final short[] basicData;
@@ -41,9 +42,9 @@ public class RehashTerrainChunk implements TerrainChunk
 	public RehashTerrainChunk(IntVector3 size)
 	{
 		if (size == null)
-			size = new IntVector3(16, 256, 16);
+			size = new IntVector3(defaultSize);
 
-		this.size = size;
+		this.size = new IntVector3(size);
 
 		this.basicData = new short[this.size.x * this.size.y * this.size.z];
 		this.extendedData = new HashMap<IntVector3, Block>();
@@ -103,7 +104,7 @@ public class RehashTerrainChunk implements TerrainChunk
 	@Override
 	public IntVector3 getSize()
 	{
-		return this.size;
+		return new IntVector3(this.size);
 	}
 
 	@Override
