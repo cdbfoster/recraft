@@ -88,6 +88,18 @@ public class IntVector3
 		return new IntVector3(this.x / b, this.y / b, this.z / b);
 	}
 
+	/** Performs modulus division (%) between each element of the two vectors. */
+	public IntVector3 mod(IntVector3 b)
+	{
+		return new IntVector3(this.x % b.x, this.y % b.y, this.z % b.z);
+	}
+
+	/** Performs modulus division (%) of each element of the vector and b. */
+	public IntVector3 mod(int b)
+	{
+		return new IntVector3(this.x % b, this.y % b, this.z % b);
+	}
+
 	@Override
 	public boolean equals(Object b)
 	{
