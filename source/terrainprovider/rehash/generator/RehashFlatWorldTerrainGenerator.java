@@ -43,7 +43,7 @@ public class RehashFlatWorldTerrainGenerator implements TerrainProvider
 		if (size == null)
 			size = new IntVector3(16, 256, 16);
 
-		TerrainChunk chunk = new RehashTerrainChunk(origin, size);
+		TerrainChunk chunk = new RehashTerrainChunk(size);
 
 		for (int x = 0; x < size.x; x++)
 			for (int z = 0; z < size.z; z++)
