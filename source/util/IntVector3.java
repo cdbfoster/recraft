@@ -34,6 +34,13 @@ public class IntVector3
 		this.z = z;
 	}
 
+	public IntVector3(IntVector3 b)
+	{
+		this.x = b.x;
+		this.y = b.y;
+		this.z = b.z;
+	}
+
 	public IntVector3()
 	{
 		this.x = 0;
