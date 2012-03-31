@@ -255,15 +255,34 @@ public class RehashTerrain implements Terrain
 	@Override
 	public boolean setBiome(IntVector3 location, Biome biome)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if (location == null || biome == null)
+			return false;
+
+		IntVector3 chunkOrigin = this.getContainingChunkOrigin(location);
+		TerrainChunk chunk = this.chunks.get(chunkOrigin);
+
+		if (chunk == null)
+		{
+			chunk = new RehashTerrainChunk(RehashTerrainChunk.defaultSize);
+			this.chunks.put(chunkOrigin, chunk);
+		}
+
+		return chunk.setBiome(location.subtract(chunkOrigin), biome);
 	}
 
 	@Override
 	public Biome getBiome(IntVector3 location)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (location == null)
+			return null;
+
+		IntVector3 chunkOrigin = this.getContainingChunkOrigin(location);
+		TerrainChunk chunk = this.chunks.get(chunkOrigin);
+
+		if (chunk == null)
+			return null;
+
+		return chunk.getBiome(location.subtract(chunkOrigin));
 	}
 
 	@Override
