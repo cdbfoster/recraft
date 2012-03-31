@@ -37,7 +37,7 @@ public class RehashTerrainChunk implements TerrainChunk
 	private final short[] basicData;
 	private final HashMap<IntVector3, Block> extendedData;
 
-	private final HashSet<IntVector3> constantUpdateList;
+	public final HashSet<IntVector3> constantUpdateList;
 
 	public RehashTerrainChunk(IntVector3 size)
 	{
@@ -56,6 +56,8 @@ public class RehashTerrainChunk implements TerrainChunk
 	public boolean setBlock(IntVector3 location, Block block)
 	{
 		if (!this.containsLocation(location))
+			return false;
+		if (block == null)
 			return false;
 
 		// Delete previous block data (if any).
