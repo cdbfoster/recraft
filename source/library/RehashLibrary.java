@@ -23,6 +23,7 @@ package recraft.library;
 
 import recraft.block.rehash.*;
 import recraft.core.*;
+import recraft.terrain.rehash.*;
 import recraft.terrainprovider.rehash.*;
 import recraft.util.AutoArrayList;
 
@@ -40,12 +41,17 @@ public class RehashLibrary extends Library
 		/*  3*/	blockSet.set(DirtBlock.id, new DirtBlock());
 		/*  7*/	blockSet.set(BedrockBlock.id, new BedrockBlock());
 
+		// Initialize Terrain Set
+		LibrarySet<Terrain> terrainSet = new LibrarySet<Terrain>(new AutoArrayList<Terrain>(1), Terrain.registry);
+		/*  0*/ terrainSet.set(0, new RehashTerrain());
+
 		// Initialize Terrain Provider Set
 		LibrarySet<TerrainProvider> terrainProviderSet = new LibrarySet<TerrainProvider>(new AutoArrayList<TerrainProvider>(2), TerrainProvider.registry);
 		/*  0*/	terrainProviderSet.set(0, new RehashFlatWorldTerrainProvider());
 
 		// Add the sets to the library.
 		this.librarySets.put(knownSetNames.get(SET_BLOCK), blockSet);
+		this.librarySets.put(knownSetNames.get(SET_TERRAIN), terrainSet);
 		this.librarySets.put(knownSetNames.get(SET_TERRAIN_PROVIDER), terrainProviderSet);
 	}
 }
