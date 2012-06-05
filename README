@@ -12,8 +12,6 @@ abstracting individual implementations.  The result is a
 more easily extensible, maintainable program to serve as a
 base for modding.
 
-    Recraft's structure is inspired by PBRT (www.pbrt.org).
-
     Recraft is released under the GNU GPL.  Please see the
 file COPYING for the full license.
 
