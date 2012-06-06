@@ -21,9 +21,7 @@
 
 package recraft.network;
 
-import java.io.BufferedInputStream;
 import java.io.EOFException;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -37,14 +35,17 @@ public class IncomingNetworkHandler
 	public final LinkedList<Packet> incomingQueue;
 
 	private Socket incomingSocket;
+	private Object socketLock;
+
 	private ObjectInputStream incomingStream;
 	private Thread listener;
 
-	public IncomingNetworkHandler(Socket incomingSocket)
+	public IncomingNetworkHandler(Socket incomingSocket, Object socketLock)
 	{
 		this.incomingQueue = new LinkedList<Packet>();
 
 		this.incomingSocket = incomingSocket;
+		this.socketLock = socketLock;
 
 		try
 		{
@@ -59,34 +60,33 @@ public class IncomingNetworkHandler
 		this.listener.start();
 	}
 
+	public IncomingNetworkHandler(Socket incomingSocket)
+	{
+		this(incomingSocket, new Object());
+	}
+
 	public void close()
 	{
-		if (this.listener == null)
-			return;
+		synchronized (this.socketLock)
+		{
+			if (this.incomingSocket == null)
+				return;
 
-		// By shutting down input first, incomingStream.readObject will throw EOFException in the listener
-		// thread, allowing it to notice an interruption.
-		try
-		{
-			this.incomingSocket.shutdownInput();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+			try
+			{
+				this.listener.interrupt();
+				this.incomingSocket.shutdownInput();
+				this.listener.join();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 
-		this.listener.interrupt();
-		try
-		{
-			this.listener.join();
+			this.incomingStream = null;
+			this.listener = null;
+			this.incomingSocket = null;
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		this.incomingStream = null;
-		this.listener = null;
 	}
 
 	/** Waits on incomingStream and populates incomingQueue. */

@@ -27,21 +27,22 @@ import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import recraft.client.network.ClientNetworkHandler;
 import recraft.core.Packet;
-import recraft.network.IncomingNetworkHandler;
-import recraft.network.OutgoingNetworkHandler;
 
 // XXX Do we need some interface for exposing the list of clients?
 
-public final class ServerNetworkHandler implements Runnable
+public final class ServerNetworkHandler
 {
 	public final LinkedList<ClientPacket> clientPackets;
 
-	// function to close
 	private ServerSocket serverSocket;
-	private LinkedList<Client> clients;
+
+	private LinkedList<ClientNetworkHandler> clients;
 
 	private LinkedList<Packet> broadcastQueue;
+
+	private Thread connectionListener;
 
 	public ServerNetworkHandler(int portNumber)
 	{
@@ -54,10 +55,13 @@ public final class ServerNetworkHandler implements Runnable
 			e.printStackTrace();
 		}
 
-		this.clients = new LinkedList<Client>();
+		this.clients = new LinkedList<ClientNetworkHandler>();
 		this.clientPackets = new LinkedList<ClientPacket>();
 
 		this.broadcastQueue = new LinkedList<Packet>();
+
+		this.connectionListener = new Thread(new ConnectionListener(this.serverSocket, this.clients));
+		this.connectionListener.start();
 	}
 
 	public void collectClientPackets()
@@ -71,7 +75,7 @@ public final class ServerNetworkHandler implements Runnable
 			ListIterator clientIterator = this.clients.listIterator();
 			while (clientIterator.hasNext())
 			{
-				Client client = (Client)clientIterator.next();
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
 				synchronized (client.incomingPackets)
 				{
 					ListIterator packetIterator = client.incomingPackets.listIterator();
@@ -81,7 +85,7 @@ public final class ServerNetworkHandler implements Runnable
 							this.clientPackets.add(new ClientPacket(client, (Packet)packetIterator.next()));
 						}
 				}
-				client.clearPackets();
+				client.clearIncomingPackets();
 			}
 		}
 	}
@@ -96,7 +100,7 @@ public final class ServerNetworkHandler implements Runnable
 	}
 
 	/** Enqueue the packet for only the given client. */
-	public void enqueuePacket(Client client, Packet packet)
+	public void enqueuePacket(ClientNetworkHandler client, Packet packet)
 	{
 		client.enqueuePacket(packet);
 	}
@@ -115,7 +119,7 @@ public final class ServerNetworkHandler implements Runnable
 					ListIterator clientIterator = this.clients.listIterator();
 					while (clientIterator.hasNext())
 					{
-						Client client = (Client)clientIterator.next();
+						ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
 						client.enqueuePacket(packet);
 					}
 				}
@@ -123,7 +127,7 @@ public final class ServerNetworkHandler implements Runnable
 				ListIterator clientIterator = this.clients.listIterator();
 				while (clientIterator.hasNext())
 				{
-					Client client = (Client)clientIterator.next();
+					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
 					client.sendPackets();
 				}
 			}
@@ -134,114 +138,80 @@ public final class ServerNetworkHandler implements Runnable
 
 	public void close()
 	{
+		if (this.connectionListener == null)
+			return;
+
 		synchronized (this.clients)
 		{
 			ListIterator clientIterator = this.clients.listIterator();
 			while (clientIterator.hasNext())
 			{
-				Client client = (Client)clientIterator.next();
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
 				client.close();
 				clientIterator.remove();
 			}
 
 			try
 			{
+				this.connectionListener.interrupt();
 				this.serverSocket.close();
+				this.connectionListener.join();
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
 		}
+
+		this.connectionListener = null;
 	}
 
-	@Override
-	public void run() // TODO Probably turn this into a private class
+	private static final class ConnectionListener implements Runnable
 	{
-		while (true)
-		{
-			Socket clientSocket = null;
-			try
-			{
-				clientSocket = this.serverSocket.accept();
-			}
-			catch (SocketException e)
-			{
-				break;
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+		private ServerSocket serverSocket;
+		private LinkedList<ClientNetworkHandler> clients;
 
-			if (clientSocket != null)
-				synchronized (this.clients)
+		public ConnectionListener(ServerSocket serverSocket, LinkedList<ClientNetworkHandler> clients)
+		{
+			this.serverSocket = serverSocket;
+			this.clients = clients;
+		}
+
+		@Override
+		public void run()
+		{
+			while (!Thread.interrupted())
+			{
+				Socket clientSocket = null;
+				try
 				{
-					this.clients.add(new Client(clientSocket));
+					clientSocket = this.serverSocket.accept();
 				}
-		}
-	}
+				catch (SocketException e)
+				{
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 
-	public static final class Client
-	{
-		public final Socket clientSocket;
-		public final OutgoingNetworkHandler outgoingNetworkHandler;
-		public final IncomingNetworkHandler incomingNetworkHandler;
-
-		/** Alias for incomingNetworkHandler.incomingQueue. */
-		public final LinkedList<Packet> incomingPackets;
-
-		public Client(Socket clientSocket)
-		{
-			this.clientSocket = clientSocket;
-			this.outgoingNetworkHandler = new OutgoingNetworkHandler(clientSocket);
-			this.incomingNetworkHandler = new IncomingNetworkHandler(clientSocket);
-
-			this.incomingPackets = this.incomingNetworkHandler.incomingQueue;
-		}
-
-		/** Alias for outgoingNetworkHandler.enqueuePacket. */
-		public void enqueuePacket(Packet packet)
-		{
-			this.outgoingNetworkHandler.enqueuePacket(packet);
-		}
-
-		/** Alias for outgoingNetworkHandler.sendPackets. */
-		public void sendPackets()
-		{
-			this.outgoingNetworkHandler.sendPackets();
-		}
-
-		public void clearPackets()
-		{
-			synchronized (this.incomingPackets) // This works to lock incomingNetworkHandler.incomingQueue, right?
-			{
-				this.incomingPackets.clear();
+				if (clientSocket != null)
+					synchronized (this.clients)
+					{
+						this.clients.add(new ClientNetworkHandler(clientSocket));
+					}
 			}
 		}
 
-		public void close()
-		{
-			this.incomingNetworkHandler.close();
-			this.outgoingNetworkHandler.close();
-			try
-			{
-				this.clientSocket.close();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
 	}
 
 	public static final class ClientPacket extends Packet
 	{
-		public final Client owner;
+		public final ClientNetworkHandler owner;
 
 		private Packet child;
 
-		public ClientPacket(Client owner, Packet child)
+		public ClientPacket(ClientNetworkHandler owner, Packet child)
 		{
 			this.owner = owner;
 			this.child = child;

@@ -21,27 +21,28 @@
 
 package recraft.network;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
 import recraft.core.Packet;
 
-// TODO Docstrings for this stuff.
 public class OutgoingNetworkHandler
 {
 	private Socket outgoingSocket;
+	private Object socketLock;
+
 	private LinkedList<Packet> outgoingQueue;
 
-	//private BufferedOutputStream bufferedStream;
 	private ObjectOutputStream outgoingStream;
 
-	public OutgoingNetworkHandler(Socket outgoingSocket)
+	public OutgoingNetworkHandler(Socket outgoingSocket, Object socketLock)
 	{
 		this.outgoingSocket = outgoingSocket;
+		this.socketLock = socketLock;
+
 		this.outgoingQueue = new LinkedList<Packet>();
 
 		try
@@ -54,42 +55,59 @@ public class OutgoingNetworkHandler
 		}
 	}
 
-	/** Enqueue packet to be sent next time sendPackets() is called. */
-	public void enqueuePacket(Packet packet)
+	public OutgoingNetworkHandler(Socket outgoingSocket)
 	{
-		synchronized (this.outgoingQueue)
+		this(outgoingSocket, new Object());
+	}
+
+	public boolean enqueuePacket(Packet packet)
+	{
+		synchronized (this.socketLock)
 		{
+			if (this.outgoingSocket == null)
+				return false;
+
 			this.outgoingQueue.add(packet);
+			return true;
 		}
 	}
 
-	public void sendPackets()
+	public boolean sendPackets()
 	{
-		synchronized (this.outgoingStream)
+		synchronized (this.socketLock)
 		{
-			synchronized (this.outgoingQueue)
-			{
-				try
-				{
-					ListIterator iterator = this.outgoingQueue.listIterator();
-					while (iterator.hasNext())
-						this.outgoingStream.writeObject(iterator.next());
-					this.outgoingStream.flush();
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
+			if (this.outgoingSocket == null)
+				return false;
 
-				this.outgoingQueue.clear();
+			try
+			{
+				ListIterator iterator = this.outgoingQueue.listIterator();
+				while (iterator.hasNext())
+				{
+					this.outgoingStream.writeObject(iterator.next());
+					iterator.remove();
+				}
+				this.outgoingStream.flush();
+			}
+			catch (SocketException e)
+			{
+				return false;
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
+		return true;
 	}
 
 	public void close()
 	{
-		synchronized (this.outgoingStream)
+		synchronized (this.socketLock)
 		{
+			if (this.outgoingSocket == null)
+				return;
+
 			try
 			{
 				this.outgoingSocket.shutdownOutput();
@@ -98,6 +116,9 @@ public class OutgoingNetworkHandler
 			{
 				e.printStackTrace();
 			}
+
+			this.outgoingStream = null;
+			this.outgoingSocket = null;
 		}
 	}
 }

@@ -26,6 +26,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ListIterator;
 
+import recraft.client.network.ClientNetworkHandler;
 import recraft.core.Packet;
 import recraft.network.IncomingNetworkHandler;
 import recraft.network.OutgoingNetworkHandler;
@@ -37,81 +38,18 @@ public class Launcher
 {
 	public static void main(String[] args)
 	{
-		ServerNetworkHandler server = new ServerNetworkHandler(21565);
-		Thread serverThread = new Thread(server);
+		ServerNetworkHandler server = new ServerNetworkHandler(25565);
+		ClientNetworkHandler client = new ClientNetworkHandler("127.0.0.1", 25565);
 
-		serverThread.start();
-
-		/*
-		try
-		{
-			Thread.sleep(100);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		//*/
-
-		Socket clientSocket = null;
-		try
-		{
-			clientSocket = new Socket("127.0.0.1", 21565);
-		}
-		catch (UnknownHostException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		OutgoingNetworkHandler out = new OutgoingNetworkHandler(clientSocket);
-		IncomingNetworkHandler in = new IncomingNetworkHandler(clientSocket);
-
-		System.out.println("Here!");
-
-		server.enqueuePacket(new TestPacket(1, 2, 3));
-		server.sendPackets();
-
-		//*
-		try
-		{
-			Thread.sleep(1);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		//*/
-
-		synchronized (in.incomingQueue)
-		{
-			ListIterator iterator = in.incomingQueue.listIterator();
-			while (iterator.hasNext())
-			{
-				Packet packet = (Packet)iterator.next();
-				System.out.println(packet.open());
-			}
-		}
-
-		in.close();
-		out.close();
-
-		//*
-		try
-		{
-			clientSocket.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		//*/
+		client.enqueuePacket(new TestPacket(1, 2, 3));
 
 		server.close();
 
-		System.out.println("Hi");
+		System.out.println(client.sendPackets());
+
+		server.close();
+
+		client.close();
 
 	}
 
