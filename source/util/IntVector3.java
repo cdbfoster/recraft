@@ -21,7 +21,9 @@
 
 package recraft.util;
 
-public class IntVector3
+import java.io.Serializable;
+
+public class IntVector3 implements Serializable
 {
 	public int x;
 	public int y;
