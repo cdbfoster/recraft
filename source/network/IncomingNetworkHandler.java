@@ -1,15 +1,40 @@
+/********************************************************************************
+ *                                                                              *
+ *  This file is part of Recraft.                                               *
+ *                                                                              *
+ *  Recraft is free software: you can redistribute it and/or modify             *
+ *  it under the terms of the GNU General Public License as published by        *
+ *  the Free Software Foundation, either version 3 of the License, or           *
+ *  (at your option) any later version.                                         *
+ *                                                                              *
+ *  Recraft is distributed in the hope that it will be useful,                  *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               *
+ *  GNU General Public License for more details.                                *
+ *                                                                              *
+ *  You should have received a copy of the GNU General Public License           *
+ *  along with Recraft.  If not, see <http://www.gnu.org/licenses/>.            *
+ *                                                                              *
+ *  Copyright 2012 Chris Foster.                                                *
+ *                                                                              *
+ ********************************************************************************/
+
 package recraft.network;
 
+import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 
-/** Uses a thread to listen to serverSocket for incoming objects.  Objects can be found in the LinkedList
- * receivedObjects.  NOTE: Synchronize all accesses to receivedObjects! */
+import recraft.core.Packet;
+
+/** Uses a thread to listen to incomingSocket for incoming packets.  Packets can be found in the LinkedList
+ * incomingQueue.  NOTE: Synchronize all accesses to incomingQueue! */
 public class IncomingNetworkHandler
 {
-	public final LinkedList<Object> receivedQueue;
+	public final LinkedList<Packet> incomingQueue;
 
 	private Socket incomingSocket;
 	private ObjectInputStream incomingStream;
@@ -17,7 +42,7 @@ public class IncomingNetworkHandler
 
 	public IncomingNetworkHandler(Socket incomingSocket)
 	{
-		this.receivedQueue = new LinkedList<Object>();
+		this.incomingQueue = new LinkedList<Packet>();
 
 		this.incomingSocket = incomingSocket;
 
@@ -25,36 +50,37 @@ public class IncomingNetworkHandler
 		{
 			this.incomingStream = new ObjectInputStream(incomingSocket.getInputStream());
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		this.listener = new Thread(new Listener(this.incomingStream, this.receivedQueue));
+		this.listener = new Thread(new Listener(this.incomingStream, this.incomingQueue));
 		this.listener.start();
 	}
 
 	public void close()
 	{
 		if (this.listener == null)
-
 			return;
+
+		// By shutting down input first, incomingStream.readObject will throw EOFException in the listener
+		// thread, allowing it to notice an interruption.
+		try
+		{
+			this.incomingSocket.shutdownInput();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 
 		this.listener.interrupt();
 		try
 		{
 			this.listener.join();
 		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-
-		try
-		{
-			this.incomingStream.close();
-		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -63,16 +89,16 @@ public class IncomingNetworkHandler
 		this.listener = null;
 	}
 
-	/** Waits on incomingStream and populates receivedObjects. */
+	/** Waits on incomingStream and populates incomingQueue. */
 	private static class Listener implements Runnable
 	{
 		private ObjectInputStream incomingStream;
-		private LinkedList<Object> receivedObjects;
+		private LinkedList<Packet> incomingQueue;
 
-		public Listener(ObjectInputStream incomingStream, LinkedList<Object> receivedObjects)
+		public Listener(ObjectInputStream incomingStream, LinkedList<Packet> incomingQueue)
 		{
 			this.incomingStream = incomingStream;
-			this.receivedObjects = receivedObjects;
+			this.incomingQueue = incomingQueue;
 		}
 
 		@Override
@@ -80,24 +106,23 @@ public class IncomingNetworkHandler
 		{
 			while (!Thread.interrupted())
 			{
-				Object in = null;
+				Packet in = null;
 				try
 				{
-					in = this.incomingStream.readObject();
+					in = (Packet)this.incomingStream.readObject();
 				}
-				catch (IOException e)
+				catch (EOFException e)
 				{
-					e.printStackTrace();
 				}
-				catch (ClassNotFoundException e)
+				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
 
 				if (in != null)
-					synchronized (this.receivedObjects)
+					synchronized (this.incomingQueue)
 					{
-						this.receivedObjects.add(in);
+						this.incomingQueue.add(in);
 					}
 			}
 		}
