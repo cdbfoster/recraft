@@ -78,8 +78,8 @@ public final class ClientNetworkHandler
 	/** Enqueue packet to be sent next time sendPackets() is called.
 	 *
 	 * @return
-	 * <b>True</b> - The packet was successfully enqueued.<br />
-	 * <b>False</b> - The socket was previously closed.
+	 * <b>true</b> - The packet was successfully enqueued.<br />
+	 * <b>false</b> - The socket was previously closed.
 	 */
 	public boolean enqueuePacket(Packet packet)
 	{
@@ -95,8 +95,8 @@ public final class ClientNetworkHandler
 	/** Send all enqueued packets.
 	 *
 	 * @return
-	 * <b>True</b> - All packets were sent successfully.  Empties outgoingQueue. <br />
-	 * <b>False</b> - The local socket is closed or disconnected from the remote socket.
+	 * <b>true</b> - All packets were sent successfully.  Empties outgoingQueue. <br />
+	 * <b>false</b> - The local socket is closed or disconnected from the remote socket.
 	 * Unsent packets remain in the outgoingNetworkHandler's queue.
 	 */
 	public boolean sendPackets()
