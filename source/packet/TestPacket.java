@@ -36,6 +36,9 @@ public class TestPacket extends Packet
 	}
 
 	@Override
+	public int getId() { return id; }
+
+	@Override
 	public Object open()
 	{
 		return this.vector;
