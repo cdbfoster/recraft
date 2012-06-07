@@ -175,6 +175,30 @@ public final class ServerNetworkHandler
 		}
 	}
 
+	/** Purge disconnected clients from the server */
+	public void purgeClients()
+	{
+		synchronized (this.serverLock)
+		{
+			if (this.serverSocket == null)
+				return;
+
+			synchronized (this.clients)
+			{
+				ListIterator clientIterator = this.clients.listIterator();
+				while (clientIterator.hasNext())
+				{
+					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+					if (!client.isIntact())
+					{
+						client.close();
+						clientIterator.remove();
+					}
+				}
+			}
+		}
+	}
+
 	/** Close down all communications.  Further use of class methods will do nothing. */
 	public void close()
 	{
