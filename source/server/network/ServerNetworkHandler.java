@@ -35,11 +35,13 @@ import recraft.core.Packet;
 public final class ServerNetworkHandler
 {
 	public final LinkedList<ClientPacket> clientPackets;
+	public final LinkedList<ClientPacket> newcomerPackets;
 
 	private ServerSocket serverSocket;
 	private Object serverLock;
 
 	private LinkedList<ClientNetworkHandler> clients;
+	private LinkedList<ClientNetworkHandler> newcomers;
 
 	private LinkedList<Packet> broadcastQueue;
 
@@ -60,13 +62,21 @@ public final class ServerNetworkHandler
 
 		this.clients = new LinkedList<ClientNetworkHandler>();
 		this.clientPackets = new LinkedList<ClientPacket>();
+		this.newcomers = new LinkedList<ClientNetworkHandler>();
+		this.newcomerPackets = new LinkedList<ClientPacket>();
 
 		this.broadcastQueue = new LinkedList<Packet>();
 
-		this.connectionListener = new Thread(new ConnectionListener(this.serverSocket, this.clients));
+		this.connectionListener = new Thread(new ConnectionListener(this.serverSocket, this.newcomers));
 		this.connectionListener.start();
 	}
 
+	/** Collects received packets from all connected clients and newcomers and dumps them in clientPackets
+	 * and newcomerPackets respectively.
+	 *
+	 * @return
+	 * <b>boolean</b> - Whether or not the server has been shut down.
+	 */
 	public boolean collectClientPackets()
 	{
 		synchronized (this.serverLock)
@@ -75,19 +85,36 @@ public final class ServerNetworkHandler
 				return false;
 
 			this.clientPackets.clear();
-			synchronized (this.clients)
+			this.newcomerPackets.clear();
+
+			// Get packets from all clients
+			ListIterator clientIterator = this.clients.listIterator();
+			while (clientIterator.hasNext())
 			{
-				ListIterator clientIterator = this.clients.listIterator();
-				while (clientIterator.hasNext())
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+				synchronized (client.incomingPackets)
 				{
-					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-					synchronized (client.incomingPackets)
+					ListIterator packetIterator = client.incomingPackets.listIterator();
+					while (packetIterator.hasNext())
+						this.clientPackets.add(new ClientPacket(client, (Packet)packetIterator.next()));
+				}
+				client.clearIncomingPackets();
+			}
+
+			// Get all newcomer packets
+			synchronized (this.newcomers)
+			{
+				ListIterator newcomerIterator = this.newcomers.listIterator();
+				while (newcomerIterator.hasNext())
+				{
+					ClientNetworkHandler newcomer = (ClientNetworkHandler)newcomerIterator.next();
+					synchronized (newcomer.incomingPackets)
 					{
-						ListIterator packetIterator = client.incomingPackets.listIterator();
+						ListIterator packetIterator = newcomer.incomingPackets.listIterator();
 						while (packetIterator.hasNext())
-							this.clientPackets.add(new ClientPacket(client, (Packet)packetIterator.next()));
+							this.newcomerPackets.add(new ClientPacket(newcomer, (Packet)packetIterator.next()));
 					}
-					client.clearIncomingPackets();
+					newcomer.clearIncomingPackets();
 				}
 			}
 		}
@@ -98,7 +125,7 @@ public final class ServerNetworkHandler
 	 *
 	 * @return
 	 * <b>true</b> - The packet was successfully enqueued.<br />
-	 * <b>false</b> - The socket was previously closed.
+	 * <b>false</b> - The server was previously closed.
 	 */
 	public boolean enqueuePacket(Packet packet)
 	{
@@ -116,7 +143,7 @@ public final class ServerNetworkHandler
 	 *
 	 * @return
 	 * <b>true</b> - The packet was successfully enqueued.<br />
-	 * <b>false</b> - The socket was previously closed or there was an issue with the client.
+	 * <b>false</b> - The server was previously closed or there was an issue with the client.
 	 */
 	public boolean enqueuePacket(ClientNetworkHandler client, Packet packet)
 	{
@@ -144,35 +171,87 @@ public final class ServerNetworkHandler
 			if (this.serverSocket == null)
 				return null;
 
-			synchronized (this.clients)
+			ListIterator packetIterator = this.broadcastQueue.listIterator();
+			while (packetIterator.hasNext())
 			{
-				ListIterator packetIterator = this.broadcastQueue.listIterator();
-				while (packetIterator.hasNext())
-				{
-					Packet packet = (Packet)packetIterator.next();
-
-					ListIterator clientIterator = this.clients.listIterator();
-					while (clientIterator.hasNext())
-					{
-						ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-						client.enqueuePacket(packet);
-					}
-				}
-
-				boolean[] sent = new boolean[this.clients.size()];
-				int currentClient = 0;
+				Packet packet = (Packet)packetIterator.next();
 
 				ListIterator clientIterator = this.clients.listIterator();
 				while (clientIterator.hasNext())
 				{
 					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-					sent[currentClient++] = client.sendPackets();
+					client.enqueuePacket(packet);
 				}
+			}
 
-				this.broadcastQueue.clear();
-				return sent;
+			boolean[] sent = new boolean[this.clients.size()];
+			int currentClient = 0;
+
+			ListIterator clientIterator = this.clients.listIterator();
+			while (clientIterator.hasNext())
+			{
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+				sent[currentClient++] = client.sendPackets();
+			}
+
+			this.broadcastQueue.clear();
+			return sent;
+		}
+	}
+
+	public int getClientCount()
+	{
+		synchronized (this.serverLock)
+		{
+			return this.clients.size();
+		}
+	}
+
+	public int getNewcomerCount()
+	{
+		synchronized (this.newcomers)
+		{
+			return this.newcomers.size();
+		}
+	}
+
+	/** If a client is trusted and should receive server broadcasts, this function can be used to move the client
+	 * from the server's newcomer pool to the client pool.
+	 *
+	 * @return
+	 * <b>boolean</b> - Whether or not the graduation succeeded.
+	 */
+	public boolean graduateClient(ClientNetworkHandler client)
+	{
+		if (client == null)
+			return false;
+
+		// Find and remove the client from the newcomers list
+		boolean foundMatch = false;
+		synchronized (this.newcomers)
+		{
+			ListIterator newcomerIterator = this.newcomers.listIterator();
+			while (newcomerIterator.hasNext())
+			{
+				ClientNetworkHandler newcomer = (ClientNetworkHandler)newcomerIterator.next();
+				if (client == newcomer)
+				{
+					newcomerIterator.remove();
+					foundMatch = true;
+					break;
+				}
 			}
 		}
+
+		if (!foundMatch)
+			return false;
+
+		// Add the client to the client list
+		synchronized (this.serverLock)
+		{
+			this.clients.add(client);
+		}
+		return true;
 	}
 
 	/** Purge disconnected clients from the server */
@@ -183,16 +262,29 @@ public final class ServerNetworkHandler
 			if (this.serverSocket == null)
 				return;
 
-			synchronized (this.clients)
+			// Purge dead clients
+			ListIterator clientIterator = this.clients.listIterator();
+			while (clientIterator.hasNext())
 			{
-				ListIterator clientIterator = this.clients.listIterator();
-				while (clientIterator.hasNext())
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+				if (!client.isIntact())
 				{
-					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-					if (!client.isIntact())
+					client.close();
+					clientIterator.remove();
+				}
+			}
+
+			// Purge dead newcomers
+			synchronized (this.newcomers)
+			{
+				ListIterator newcomerIterator = this.newcomers.listIterator();
+				while (newcomerIterator.hasNext())
+				{
+					ClientNetworkHandler newcomer = (ClientNetworkHandler)newcomerIterator.next();
+					if (!newcomer.isIntact())
 					{
-						client.close();
-						clientIterator.remove();
+						newcomer.close();
+						newcomerIterator.remove();
 					}
 				}
 			}
@@ -207,26 +299,36 @@ public final class ServerNetworkHandler
 			if (this.serverSocket == null)
 				return;
 
-			synchronized (this.clients)
+			// Close clients
+			ListIterator clientIterator = this.clients.listIterator();
+			while (clientIterator.hasNext())
 			{
-				ListIterator clientIterator = this.clients.listIterator();
-				while (clientIterator.hasNext())
-				{
-					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-					client.close();
-					clientIterator.remove();
-				}
+				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+				client.close();
+				clientIterator.remove();
+			}
 
-				try
+			// Close newcomers
+			synchronized (this.newcomers)
+			{
+				ListIterator newcomerIterator = this.newcomers.listIterator();
+				while (newcomerIterator.hasNext())
 				{
-					this.connectionListener.interrupt();
-					this.serverSocket.close();
-					this.connectionListener.join();
+					ClientNetworkHandler newcomer = (ClientNetworkHandler)newcomerIterator.next();
+					newcomer.close();
+					newcomerIterator.remove();
 				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
+			}
+
+			try
+			{
+				this.connectionListener.interrupt();
+				this.serverSocket.close();
+				this.connectionListener.join();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 
 			this.connectionListener = null;
@@ -238,12 +340,12 @@ public final class ServerNetworkHandler
 	private static final class ConnectionListener implements Runnable
 	{
 		private ServerSocket serverSocket;
-		private LinkedList<ClientNetworkHandler> clients;
+		private LinkedList<ClientNetworkHandler> newcomers;
 
-		public ConnectionListener(ServerSocket serverSocket, LinkedList<ClientNetworkHandler> clients)
+		public ConnectionListener(ServerSocket serverSocket, LinkedList<ClientNetworkHandler> newcomers)
 		{
 			this.serverSocket = serverSocket;
-			this.clients = clients;
+			this.newcomers = newcomers;
 		}
 
 		@Override
@@ -258,6 +360,7 @@ public final class ServerNetworkHandler
 				}
 				catch (SocketException e)
 				{
+					break;
 				}
 				catch (Exception e)
 				{
@@ -265,9 +368,9 @@ public final class ServerNetworkHandler
 				}
 
 				if (clientSocket != null)
-					synchronized (this.clients)
+					synchronized (this.newcomers)
 					{
-						this.clients.add(new ClientNetworkHandler(clientSocket));
+						this.newcomers.add(new ClientNetworkHandler(clientSocket));
 					}
 			}
 		}
