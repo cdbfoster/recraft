@@ -67,6 +67,8 @@ public class IncomingNetworkHandler
 
 	public boolean isIntact()
 	{
+		if (this.listener == null)
+			return false;
 		return this.listener.isAlive();
 	}
 
