@@ -30,13 +30,14 @@ import java.util.ListIterator;
 import recraft.client.network.ClientNetworkHandler;
 import recraft.core.Packet;
 
-// XXX Do we need some interface for exposing the list of clients?
-
+/** Handles server-like network responsibilities such as accepting new connections to clients, collecting
+ * packets received from clients, and broadcasting packets to connected clients.  This class is thread-safe. */
 public final class ServerNetworkHandler
 {
 	public final LinkedList<ClientPacket> clientPackets;
 
 	private ServerSocket serverSocket;
+	private Object serverLock;
 
 	private LinkedList<ClientNetworkHandler> clients;
 
@@ -55,6 +56,8 @@ public final class ServerNetworkHandler
 			e.printStackTrace();
 		}
 
+		this.serverLock = new Object();
+
 		this.clients = new LinkedList<ClientNetworkHandler>();
 		this.clientPackets = new LinkedList<ClientPacket>();
 
@@ -64,51 +67,83 @@ public final class ServerNetworkHandler
 		this.connectionListener.start();
 	}
 
-	public void collectClientPackets()
+	public boolean collectClientPackets()
 	{
-		synchronized (this.clientPackets)
+		synchronized (this.serverLock)
 		{
+			if (this.serverSocket == null)
+				return false;
+
 			this.clientPackets.clear();
-		}
-		synchronized (this.clients)
-		{
-			ListIterator clientIterator = this.clients.listIterator();
-			while (clientIterator.hasNext())
+			synchronized (this.clients)
 			{
-				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-				synchronized (client.incomingPackets)
+				ListIterator clientIterator = this.clients.listIterator();
+				while (clientIterator.hasNext())
 				{
-					ListIterator packetIterator = client.incomingPackets.listIterator();
-					while (packetIterator.hasNext())
-						synchronized (this.clientPackets)
-						{
+					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+					synchronized (client.incomingPackets)
+					{
+						ListIterator packetIterator = client.incomingPackets.listIterator();
+						while (packetIterator.hasNext())
 							this.clientPackets.add(new ClientPacket(client, (Packet)packetIterator.next()));
-						}
+					}
+					client.clearIncomingPackets();
 				}
-				client.clearIncomingPackets();
 			}
 		}
+		return true;
 	}
 
-	/** Enqueue the packet to be broadcast to all clients. */
-	public void enqueuePacket(Packet packet)
+	/** Enqueue the packet to be broadcast to all clients.
+	 *
+	 * @return
+	 * <b>true</b> - The packet was successfully enqueued.<br />
+	 * <b>false</b> - The socket was previously closed.
+	 */
+	public boolean enqueuePacket(Packet packet)
 	{
-		synchronized (this.broadcastQueue)
+		synchronized (this.serverLock)
 		{
+			if (this.serverSocket == null)
+				return false;
+
 			this.broadcastQueue.add(packet);
+		}
+		return true;
+	}
+
+	/** Enqueue packet for only the given client.
+	 *
+	 * @return
+	 * <b>true</b> - The packet was successfully enqueued.<br />
+	 * <b>false</b> - The socket was previously closed or there was an issue with the client.
+	 */
+	public boolean enqueuePacket(ClientNetworkHandler client, Packet packet)
+	{
+		synchronized (this.serverLock)
+		{
+			if (this.serverSocket == null)
+				return false;
+
+			return client.enqueuePacket(packet);
 		}
 	}
 
-	/** Enqueue the packet for only the given client. */
-	public void enqueuePacket(ClientNetworkHandler client, Packet packet)
+	/** Broadcast any enqueued packets and instruct all connected ClientNetworkHandlers to send their
+	 * individually enqueued packets.
+	 *
+	 * @return
+	 * <b>boolean[]</b> - An array of booleans the size of the number of connected clients.  Each entry contains
+	 * <b>true</b> or <b>false</b> depending on whether or not the corresponding ClientNetworkHandler was successful
+	 * in sending its enqueued packets to the connected client.
+	 */
+	public boolean[] sendPackets()
 	{
-		client.enqueuePacket(packet);
-	}
-
-	public void sendPackets()
-	{
-		synchronized (this.broadcastQueue)
+		synchronized (this.serverLock)
 		{
+			if (this.serverSocket == null)
+				return null;
+
 			synchronized (this.clients)
 			{
 				ListIterator packetIterator = this.broadcastQueue.listIterator();
@@ -124,48 +159,58 @@ public final class ServerNetworkHandler
 					}
 				}
 
+				boolean[] sent = new boolean[this.clients.size()];
+				int currentClient = 0;
+
 				ListIterator clientIterator = this.clients.listIterator();
 				while (clientIterator.hasNext())
 				{
 					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-					client.sendPackets();
+					sent[currentClient++] = client.sendPackets();
+				}
+
+				this.broadcastQueue.clear();
+				return sent;
+			}
+		}
+	}
+
+	/** Close down all communications.  Further use of class methods will do nothing. */
+	public void close()
+	{
+		synchronized (this.serverLock)
+		{
+			if (this.serverSocket == null)
+				return;
+
+			synchronized (this.clients)
+			{
+				ListIterator clientIterator = this.clients.listIterator();
+				while (clientIterator.hasNext())
+				{
+					ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
+					client.close();
+					clientIterator.remove();
+				}
+
+				try
+				{
+					this.connectionListener.interrupt();
+					this.serverSocket.close();
+					this.connectionListener.join();
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
 				}
 			}
 
-			this.broadcastQueue.clear();
+			this.connectionListener = null;
+			this.serverSocket = null;
 		}
 	}
 
-	public void close()
-	{
-		if (this.connectionListener == null)
-			return;
-
-		synchronized (this.clients)
-		{
-			ListIterator clientIterator = this.clients.listIterator();
-			while (clientIterator.hasNext())
-			{
-				ClientNetworkHandler client = (ClientNetworkHandler)clientIterator.next();
-				client.close();
-				clientIterator.remove();
-			}
-
-			try
-			{
-				this.connectionListener.interrupt();
-				this.serverSocket.close();
-				this.connectionListener.join();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		this.connectionListener = null;
-	}
-
+	/** Runs inside a thread to listen for and handle new clients. */
 	private static final class ConnectionListener implements Runnable
 	{
 		private ServerSocket serverSocket;
@@ -205,6 +250,7 @@ public final class ServerNetworkHandler
 
 	}
 
+	/** Packet wrapper class that can point to the connected client that sent the packet. */
 	public static final class ClientPacket extends Packet
 	{
 		public final ClientNetworkHandler owner;
