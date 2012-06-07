@@ -81,11 +81,11 @@ public class OutgoingNetworkHandler
 
 			try
 			{
-				ListIterator iterator = this.outgoingQueue.listIterator();
-				while (iterator.hasNext())
+				ListIterator packetIterator = this.outgoingQueue.listIterator();
+				while (packetIterator.hasNext())
 				{
-					this.outgoingStream.writeObject(iterator.next());
-					iterator.remove();
+					this.outgoingStream.writeObject(packetIterator.next());
+					packetIterator.remove();
 				}
 				this.outgoingStream.flush();
 			}
