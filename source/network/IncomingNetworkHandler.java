@@ -65,6 +65,11 @@ public class IncomingNetworkHandler
 		this(incomingSocket, new Object());
 	}
 
+	public boolean isIntact()
+	{
+		return this.listener.isAlive();
+	}
+
 	public void close()
 	{
 		synchronized (this.socketLock)
@@ -113,6 +118,7 @@ public class IncomingNetworkHandler
 				}
 				catch (EOFException e)
 				{
+					break;
 				}
 				catch (Exception e)
 				{

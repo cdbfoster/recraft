@@ -113,10 +113,15 @@ public final class ClientNetworkHandler
 	/** Clears all received packets in incomingPackets. */
 	public void clearIncomingPackets()
 	{
-		synchronized (this.incomingPackets) // This works to lock incomingNetworkHandler.incomingQueue, right?
+		synchronized (this.incomingPackets)
 		{
 			this.incomingPackets.clear();
 		}
+	}
+
+	public boolean isIntact()
+	{
+		return this.incomingNetworkHandler.isIntact();
 	}
 
 	/** Close down the socket and network handlers.  Further use of class methods will do nothing. */
