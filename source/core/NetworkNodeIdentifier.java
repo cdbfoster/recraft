@@ -19,51 +19,58 @@
  *                                                                              *
  ********************************************************************************/
 
-package recraft;
+package recraft.core;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import recraft.core.*;
-import recraft.core.NetworkInterface;
-import recraft.core.NetworkInterface.NodePacketPair;
-import recraft.networkinterface.UDPNetworkInterface;
-import recraft.packet.TestPacket;
-import recraft.util.IntVector3;
-
-public class Launcher
+public final class NetworkNodeIdentifier implements Serializable
 {
-	public static void main(String[] args) throws Exception
+	public final InetAddress inetAddress;
+	public final int port;
+
+	public NetworkNodeIdentifier(String hostName, int port) throws UnknownHostException
 	{
-		NetworkInterface server = new UDPNetworkInterface(25565);
-		NetworkInterface client = new UDPNetworkInterface();
+		this(InetAddress.getByName(hostName), port);
+	}
 
-		Packet packet = new TestPacket(1, 2, 3);
+	public NetworkNodeIdentifier(InetAddress inetAddress, int port)
+	{
+		this.inetAddress = inetAddress;
+		this.port = port;
+	}
 
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
+	@Override
+	public boolean equals(Object b)
+	{
+		if (this == b)
+			return true;
+		if (b == null)
+			return false;
+		if (this.getClass() != b.getClass())
+			return false;
 
-		packet = new TestPacket(2, 6, 3);
+		NetworkNodeIdentifier c = (NetworkNodeIdentifier)b;
 
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
+		if (!this.inetAddress.equals(c.inetAddress))
+			return false;
+		if (this.port != c.port)
+			return false;
 
-		client.sendPacketQueue();
+		return true;
+	}
 
-		Thread.sleep(1000);
+	@Override
+	public int hashCode()
+	{
+		// 17 is an odd prime.
+		return 17 * this.inetAddress.hashCode() + this.port;
+	}
 
-		LinkedList incoming = server.getIncomingPackets();
-
-		System.out.println(incoming.size());
-
-		ListIterator iterator = incoming.listIterator();
-		while (iterator.hasNext())
-		{
-			NodePacketPair pair = (NodePacketPair)iterator.next();
-			Packet pack = pair.packet;
-			System.out.println((IntVector3)pack.open());
-		}
-
-		client.close();
-
+	@Override
+	public String toString()
+	{
+		return String.format("%s:%d", this.inetAddress.toString(), this.port);
 	}
 }

@@ -19,51 +19,41 @@
  *                                                                              *
  ********************************************************************************/
 
-package recraft;
+package recraft.core;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 
-import recraft.core.*;
-import recraft.core.NetworkInterface;
-import recraft.core.NetworkInterface.NodePacketPair;
-import recraft.networkinterface.UDPNetworkInterface;
-import recraft.packet.TestPacket;
-import recraft.util.IntVector3;
-
-public class Launcher
+/** Handles sending and receiving of Packets to and from specified network nodes. */
+public interface NetworkInterface
 {
-	public static void main(String[] args) throws Exception
+	/** Send a packet to the specified network node. */
+	boolean sendPacket(NetworkNodeIdentifier node, Packet packet);
+
+	/** Add a packet to the outgoing packet queue */
+	boolean enqueuePacket(NetworkNodeIdentifier node, Packet packet);
+	/** Send all packets in and clear the outgoing packet queue */
+	boolean sendPacketQueue();
+
+	/** Returns the incoming packet queue in the form of a list of NodePacketPairs.  Synchronize access to the returned list. */
+	LinkedList<NodePacketPair> getIncomingPackets();
+	/** Returns the incoming packet queue in the form of a HashMap of network nodes to lists of packets received by each unique node.  Synchronize access to the returned map. */
+	HashMap<NetworkNodeIdentifier, LinkedList<Packet>> getIncomingPacketsMap();
+	/** Clear the incoming packet queue */
+	void clearIncomingPackets();
+
+	/** Free all resources used by and prevent further communication through this network interface. */
+	void close();
+
+	public static class NodePacketPair
 	{
-		NetworkInterface server = new UDPNetworkInterface(25565);
-		NetworkInterface client = new UDPNetworkInterface();
+		public final NetworkNodeIdentifier node;
+		public final Packet packet;
 
-		Packet packet = new TestPacket(1, 2, 3);
-
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-
-		packet = new TestPacket(2, 6, 3);
-
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-
-		client.sendPacketQueue();
-
-		Thread.sleep(1000);
-
-		LinkedList incoming = server.getIncomingPackets();
-
-		System.out.println(incoming.size());
-
-		ListIterator iterator = incoming.listIterator();
-		while (iterator.hasNext())
+		public NodePacketPair(NetworkNodeIdentifier node, Packet packet)
 		{
-			NodePacketPair pair = (NodePacketPair)iterator.next();
-			Packet pack = pair.packet;
-			System.out.println((IntVector3)pack.open());
+			this.node = node;
+			this.packet = packet;
 		}
-
-		client.close();
-
 	}
 }
