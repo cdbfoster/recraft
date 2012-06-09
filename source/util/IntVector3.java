@@ -140,6 +140,6 @@ public class IntVector3 implements Serializable
 	@Override
 	public String toString()
 	{
-		return (new StringBuilder().append("( ").append(this.x).append(", ").append(this.y).append(", ").append(this.z).append(" )").toString());
+		return String.format("( %d, %d, %d )", this.x, this.y, this.z);
 	}
 }
