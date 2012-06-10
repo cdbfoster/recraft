@@ -33,11 +33,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkNodeIdentifier;
 import recraft.core.Packet;
 
-public class UDPNetworkInterface implements NetworkInterface
+public class UDPNetworkInterface implements NetworkInterface, Creatable
 {
 	private DatagramSocket socket;
 
@@ -48,6 +49,16 @@ public class UDPNetworkInterface implements NetworkInterface
 	private Thread listener;
 
 	private Object lock;
+
+	public static UDPNetworkInterface create() throws SocketException
+	{
+		return new UDPNetworkInterface();
+	}
+
+	public static UDPNetworkInterface create(Integer port) throws SocketException
+	{
+		return new UDPNetworkInterface(port.intValue());
+	}
 
 	public UDPNetworkInterface() throws SocketException
 	{

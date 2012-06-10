@@ -21,17 +21,21 @@
 
 package recraft.core;
 
-public abstract class NetworkNode implements Runnable, Creatable
+/** Decorator interface to indicate that the implementing object should provide a static create(...) method.
+ * Check other interfaces or abstract classes the object implements/extends for */
+public interface Creatable
 {
-	private NetworkInterface networkInterface;
 
-	public NetworkNode(NetworkInterface networkInterface)
+	public static class CreatableException extends Exception
 	{
-		this.networkInterface = networkInterface;
+		public CreatableException()
+		{
+			super();
+		}
+
+		public CreatableException(String message)
+		{
+			super(message);
+		}
 	}
-
-	@Override
-	public abstract void run();
-
-	public abstract void stop();
 }

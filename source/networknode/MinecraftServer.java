@@ -21,18 +21,17 @@
 
 package recraft.networknode;
 
+import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkNode;
 
-public class MinecraftServer extends NetworkNode
+public class MinecraftServer extends NetworkNode implements Creatable
 {
-	private MinecraftServerConfiguration configuration;
+	// TODO create methods
 
-	public MinecraftServer(MinecraftServerConfiguration configuration, NetworkInterface networkInterface)
+	public MinecraftServer()
 	{
-		super(networkInterface);
-
-		this.configuration = configuration;
+		super(null);
 	}
 
 	@Override
@@ -46,12 +45,6 @@ public class MinecraftServer extends NetworkNode
 	public void stop()
 	{
 		// TODO Auto-generated method stub
-
-	}
-
-	public static class MinecraftServerConfiguration
-	{
-		// How do we handle configuration?
 
 	}
 }

@@ -27,6 +27,10 @@ import java.util.LinkedList;
 /** Handles sending and receiving of Packets to and from specified network nodes. */
 public interface NetworkInterface
 {
+	// Create the following methods in implementing classes:
+	// public static ImplementingClass create();
+	// public static ImplementingClass create(Integer port);
+
 	/** Send a packet to the specified network node. */
 	boolean sendPacket(NetworkNodeIdentifier node, Packet packet);
 
