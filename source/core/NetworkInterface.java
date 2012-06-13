@@ -39,9 +39,9 @@ public interface NetworkInterface
 	/** Send all packets in and clear the outgoing packet queue */
 	boolean sendPacketQueue();
 
-	/** Returns the incoming packet queue in the form of a list of NodePacketPairs.  Synchronize access to the returned list. */
+	/** Returns the incoming packet queue in the form of a list of NodePacketPairs.  Synchronize access to the returned list.  Returns null if the interface has been closed. */
 	LinkedList<NodePacketPair> getIncomingPackets();
-	/** Returns the incoming packet queue in the form of a HashMap of network nodes to lists of packets received by each unique node.  Synchronize access to the returned map. */
+	/** Returns the incoming packet queue in the form of a HashMap of network nodes to lists of packets received by each unique node.  Synchronize access to the returned map.  Returns null if the interface has been closed. */
 	HashMap<NetworkNodeIdentifier, LinkedList<Packet>> getIncomingPacketsMap();
 	/** Clear the incoming packet queue */
 	void clearIncomingPackets();
