@@ -30,4 +30,7 @@ public abstract class Packet implements Serializable
 	public int getId() { return id; }
 
 	public Object open() { return null; }
+
+	@Override
+	public abstract String toString();
 }

@@ -26,7 +26,7 @@ import recraft.util.IntVector3;
 
 public class TestPacket extends Packet
 {
-	public static int id = 1;
+	public static int id = 0;
 
 	private IntVector3 vector;
 
@@ -42,5 +42,11 @@ public class TestPacket extends Packet
 	public Object open()
 	{
 		return this.vector;
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("Packet %d: Test: %s", id, this.vector.toString());
 	}
 }
