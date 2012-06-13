@@ -21,14 +21,21 @@
 
 package recraft.networknode;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 import recraft.core.Configurator;
 import recraft.core.Configurator.*;
 import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
+import recraft.core.NetworkInterface.NodePacketPair;
 import recraft.core.NetworkNode;
 
 public class MinecraftServer extends NetworkNode implements Creatable
 {
+	private Object lock;
+	private boolean stopped;
+
 	public static MinecraftServer create()
 	{
 		return new MinecraftServer();
@@ -45,24 +52,61 @@ public class MinecraftServer extends NetworkNode implements Creatable
 		Object[] parameters = {new Integer(portRange.getValue())};
 
 		this.networkInterface = (NetworkInterface)interfaceCreator.create(parameters);
+		this.lock = new Object();
+		this.stopped = false;
 	}
 
 	public MinecraftServer(NetworkInterface networkInterface)
 	{
 		this.networkInterface = networkInterface;
+		this.lock = new Object();
+		this.stopped = false;
 	}
 
 	@Override
 	public void run()
 	{
-		// TODO Auto-generated method stub
+		while (true)
+		{
+			synchronized (this.lock)
+			{
+				if (this.stopped)
+					break;
+			}
 
+			// Get the packets we've received
+			LinkedList<NodePacketPair> incomingPackets = this.networkInterface.getIncomingPackets();
+
+			if (incomingPackets == null)
+				continue;
+
+			// Try to read them
+			synchronized (incomingPackets)
+			{
+				ListIterator packetIterator = incomingPackets.listIterator();
+				while (packetIterator.hasNext())
+				{
+					NodePacketPair pair = (NodePacketPair)packetIterator.next();
+
+					// Simply display info about received packets
+					System.out.println(String.format("Packet received from %s", pair.node));
+					System.out.println(pair.packet);
+					System.out.println();
+				}
+			}
+
+			// Clear the queue in preparation for the next cycle
+			this.networkInterface.clearIncomingPackets();
+		}
 	}
 
 	@Override
 	public void stop()
 	{
-		// TODO Auto-generated method stub
-
+		synchronized (this.lock)
+		{
+			this.networkInterface.close();
+			this.stopped = true;
+		}
 	}
 }

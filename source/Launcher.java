@@ -22,48 +22,46 @@
 package recraft;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 
 import recraft.core.*;
+import recraft.core.Configurator.ConfiguratorCreatable;
+import recraft.core.Configurator.ConfiguratorSelect;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkInterface.NodePacketPair;
 import recraft.networkinterface.UDPNetworkInterface;
+import recraft.networknode.MinecraftServer;
+import recraft.packet.InputPacket;
 import recraft.packet.TestPacket;
 import recraft.util.IntVector3;
 
 public class Launcher
 {
+
 	public static void main(String[] args) throws Exception
 	{
-		NetworkInterface server = new UDPNetworkInterface(25565);
-		NetworkInterface client = new UDPNetworkInterface();
+		//*
+		MinecraftServer server = new MinecraftServer();
+		Thread serverThread = new Thread(server);
+		serverThread.start();
 
-		Packet packet = new TestPacket(1, 2, 3);
+		ConfiguratorCreatable interfaceCreator = (ConfiguratorCreatable)((ConfiguratorSelect)Configurator.get("Options.Network.Network Interface")).getValue();
+		NetworkInterface clientInterface = (NetworkInterface)interfaceCreator.create(null);
 
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
+		Packet packet = new InputPacket(1, new Input());
+		clientInterface.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
+		packet = new TestPacket(82);
+		clientInterface.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
 
-		packet = new TestPacket(2, 6, 3);
-
-		client.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-
-		client.sendPacketQueue();
+		clientInterface.sendPacketQueue();
 
 		Thread.sleep(1000);
 
-		LinkedList incoming = server.getIncomingPackets();
-
-		System.out.println(incoming.size());
-
-		ListIterator iterator = incoming.listIterator();
-		while (iterator.hasNext())
-		{
-			NodePacketPair pair = (NodePacketPair)iterator.next();
-			Packet pack = pair.packet;
-			System.out.println((IntVector3)pack.open());
-		}
-
-		client.close();
-
+		clientInterface.close();
+		server.stop();
+		serverThread.join();
+		//*/
 	}
 }
