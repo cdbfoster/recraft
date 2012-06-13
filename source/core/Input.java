@@ -90,7 +90,8 @@ public class Input implements Serializable
 					string += "0 ";
 				else
 					string += "1 ";
-			string += "\n";
+			if (i == 0)
+				string += "\n";
 		}
 		return string;
 	}
