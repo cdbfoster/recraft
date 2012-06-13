@@ -31,11 +31,14 @@ import recraft.networknode.MinecraftServer;
 
 public class Configurator
 {
+	private static HashMap<String, Object> configuration = new HashMap<String, Object>();
+
 	static
 	{
 		try
 		{
 			ConfiguratorSelect select = null;
+			ConfiguratorIntRange intRange = null;
 
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
@@ -43,16 +46,17 @@ public class Configurator
 			select = Configurator.addSelect("Options.Network.Network Nodes.Client");
 			//select.addItem(new ConfiguratorCreatable("Minecraft Client", MinecraftClient.class));
 
-			select = Configurator.addSelect("Options.Network.Network Nodes.Server");
+			select = Configurator.addSelect("Options.Network.Network Nodes.Server.Node Type");
 			select.addItem(new ConfiguratorCreatable("Minecraft Server", MinecraftServer.class));
+
+			intRange = Configurator.addIntRange("Options.Network.Network Nodes.Server.Bind Port", 1024, 65535, 25565);
+
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
-
-	private static HashMap<String, Object> configuration = new HashMap<String, Object>();
 
 	public static ConfiguratorSelect addSelect(String path)
 	{
@@ -65,11 +69,11 @@ public class Configurator
 
 		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
 
-		String selectName = splitPath[splitPath.length - 1];
+		String name = splitPath[splitPath.length - 1];
 
-		if (containingGroup.items.containsKey(selectName))
+		if (containingGroup.items.containsKey(name))
 		{
-			Object object = containingGroup.items.get(selectName);
+			Object object = containingGroup.items.get(name);
 			if (object instanceof ConfiguratorSelect)
 				return (ConfiguratorSelect)object;
 			else
@@ -77,9 +81,61 @@ public class Configurator
 		}
 		else
 		{
-			ConfiguratorSelect select = new ConfiguratorSelect(selectName, new ArrayList<Object>());
-			containingGroup.items.put(selectName, select);
+			ConfiguratorSelect select = new ConfiguratorSelect(name, new ArrayList<Object>());
+			containingGroup.items.put(name, select);
 			return select;
+		}
+	}
+
+	public static ConfiguratorIntRange addIntRange(String path, int rangeLow, int rangeHigh, int defaultValue)
+	{
+		String[] splitPath = path.split("\\.");
+		if (splitPath.length <= 1)
+			return null;
+
+		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
+
+		String name = splitPath[splitPath.length - 1];
+
+		if (containingGroup.items.containsKey(name))
+		{
+			Object object = containingGroup.items.get(name);
+			if (object instanceof ConfiguratorIntRange)
+				return (ConfiguratorIntRange)object;
+			else
+				return null;
+		}
+		else
+		{
+			ConfiguratorIntRange intRange = new ConfiguratorIntRange(name, rangeLow, rangeHigh, defaultValue);
+			containingGroup.items.put(name, intRange);
+			return intRange;
+		}
+	}
+
+	public static ConfiguratorFloatRange addFloatRange(String path, float rangeLow, float rangeHigh, float defaultValue)
+	{
+		String[] splitPath = path.split("\\.");
+		if (splitPath.length <= 1)
+			return null;
+
+		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
+
+		String name = splitPath[splitPath.length - 1];
+
+		if (containingGroup.items.containsKey(name))
+		{
+			Object object = containingGroup.items.get(name);
+			if (object instanceof ConfiguratorFloatRange)
+				return (ConfiguratorFloatRange)object;
+			else
+				return null;
+		}
+		else
+		{
+			ConfiguratorFloatRange floatRange = new ConfiguratorFloatRange(name, rangeLow, rangeHigh, defaultValue);
+			containingGroup.items.put(name, floatRange);
+			return floatRange;
 		}
 	}
 
@@ -151,36 +207,36 @@ public class Configurator
 		public final String name;
 		public final ArrayList<Object> items;
 
-		public int defaultItem;
-		public int selectedItem;
+		public int defaultValue;
+		public int currentValue;
 
 		public ConfiguratorSelect(String name, ArrayList<Object> items)
 		{
 			this.name = name;
 			this.items = items;
 
-			this.defaultItem = 0;
-			this.selectedItem = -1;
+			this.defaultValue = 0;
+			this.currentValue = -1;
 		}
 
-		public boolean select(int item)
+		public boolean set(int item)
 		{
 			if (item < 0 || item >= this.items.size())
 				return false;
 
-			this.selectedItem = item;
+			this.currentValue = item;
 			return true;
 		}
 
-		public Object getSelected()
+		public Object getValue()
 		{
 			if (this.items.size() == 0)
 				return null;
 
-			if (this.selectedItem == -1)
-				return this.items.get(this.defaultItem);
+			if (this.currentValue == -1)
+				return this.items.get(this.defaultValue);
 			else
-				return this.items.get(this.selectedItem);
+				return this.items.get(this.currentValue);
 		}
 
 		public void addItem(Object item)
@@ -212,9 +268,13 @@ public class Configurator
 		public Object create(Object[] parameters)
 		{
 			// Extract class objects from parameters
-			Class[] parameterClasses = new Class[parameters.length];
-			for (int index = 0; index < parameters.length; index++)
-				parameterClasses[index] = parameters[index].getClass();
+			Class[] parameterClasses = null;
+			if (parameters != null)
+			{
+				parameterClasses = new Class[parameters.length];
+				for (int index = 0; index < parameters.length; index++)
+					parameterClasses[index] = parameters[index].getClass();
+			}
 
 			try
 			{
@@ -239,5 +299,77 @@ public class Configurator
 		}
 	}
 
-	// TODO Add other input types like integer ranges, float ranges, string input, boolean, check group, etc.
+	public static class ConfiguratorIntRange
+	{
+		public final String name;
+		public final int rangeLow;
+		public final int rangeHigh;
+
+		public int defaultValue;
+		public int currentValue;
+
+		public ConfiguratorIntRange(String name, int rangeLow, int rangeHigh, int defaultValue)
+		{
+			this.name = name;
+			this.rangeLow = rangeLow;
+			this.rangeHigh = rangeHigh;
+			this.defaultValue = defaultValue;
+			this.currentValue  = -1;
+		}
+
+		public boolean set(int value)
+		{
+			if (value < this.rangeLow || value > this.rangeHigh)
+				return false;
+
+			this.currentValue = value;
+			return true;
+		}
+
+		public int getValue()
+		{
+			if (this.currentValue == -1)
+				return this.defaultValue;
+
+			return this.currentValue;
+		}
+	}
+
+	public static class ConfiguratorFloatRange
+	{
+		public final String name;
+		public final float rangeLow;
+		public final float rangeHigh;
+
+		public float defaultValue;
+		public float currentValue;
+
+		public ConfiguratorFloatRange(String name, float rangeLow, float rangeHigh, float defaultValue)
+		{
+			this.name = name;
+			this.rangeLow = rangeLow;
+			this.rangeHigh = rangeHigh;
+			this.defaultValue = defaultValue;
+			this.currentValue  = -1;
+		}
+
+		public boolean set(float value)
+		{
+			if (value < this.rangeLow || value > this.rangeHigh)
+				return false;
+
+			this.currentValue = value;
+			return true;
+		}
+
+		public float getValue()
+		{
+			if (this.currentValue == -1)
+				return this.defaultValue;
+
+			return this.currentValue;
+		}
+	}
+
+	// TODO Add other input types like string input, boolean, check group, etc.
 }

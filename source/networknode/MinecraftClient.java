@@ -19,24 +19,49 @@
  *                                                                              *
  ********************************************************************************/
 
-package recraft.core;
+package recraft.networknode;
 
-import recraft.core.Configurator.*;
+import recraft.core.Configurator;
+import recraft.core.Creatable;
+import recraft.core.NetworkInterface;
+import recraft.core.NetworkNode;
+import recraft.core.Configurator.ConfiguratorCreatable;
+import recraft.core.Configurator.ConfiguratorSelect;
 
-public abstract class NetworkNode implements Runnable, Creatable
+public class MinecraftClient extends NetworkNode implements Creatable
 {
-	// Create the following method in implementing classes:
-	// public static ImplementingClass create();
-
-	protected NetworkInterface networkInterface;
-
-	public NetworkNode()
+	public static MinecraftClient create()
 	{
+		return new MinecraftClient();
+	}
+
+	public MinecraftClient()
+	{
+		super();
+
+		ConfiguratorSelect interfaceSelect = (ConfiguratorSelect)Configurator.get("Options.Network.Network Interface");
+		ConfiguratorCreatable interfaceCreator= (ConfiguratorCreatable)interfaceSelect.getValue();
+
+		this.networkInterface = (NetworkInterface)interfaceCreator.create(null);
+	}
+
+	public MinecraftClient(NetworkInterface networkInterface)
+	{
+		this.networkInterface = networkInterface;
+	}
+
+	@Override
+	public void run()
+	{
+		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public abstract void run();
+	public void stop()
+	{
+		// TODO Auto-generated method stub
 
-	public abstract void stop();
+	}
+
 }

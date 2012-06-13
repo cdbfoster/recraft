@@ -21,17 +21,35 @@
 
 package recraft.networknode;
 
+import recraft.core.Configurator;
+import recraft.core.Configurator.*;
 import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkNode;
 
 public class MinecraftServer extends NetworkNode implements Creatable
 {
-	// TODO create methods
+	public static MinecraftServer create()
+	{
+		return new MinecraftServer();
+	}
 
 	public MinecraftServer()
 	{
-		super(null);
+		super();
+
+		ConfiguratorSelect interfaceSelect = (ConfiguratorSelect)Configurator.get("Options.Network.Network Interface");
+		ConfiguratorCreatable interfaceCreator= (ConfiguratorCreatable)interfaceSelect.getValue();
+
+		ConfiguratorIntRange portRange = (ConfiguratorIntRange)Configurator.get("Options.Network.Network Nodes.Server.Bind Port");
+		Object[] parameters = {new Integer(portRange.getValue())};
+
+		this.networkInterface = (NetworkInterface)interfaceCreator.create(parameters);
+	}
+
+	public MinecraftServer(NetworkInterface networkInterface)
+	{
+		this.networkInterface = networkInterface;
 	}
 
 	@Override
