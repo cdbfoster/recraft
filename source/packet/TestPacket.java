@@ -28,11 +28,9 @@ public class TestPacket extends Packet
 {
 	public static int id = 0;
 
-	private IntVector3 vector;
-
-	public TestPacket(int x, int y, int z)
+	public TestPacket(int tick)
 	{
-		this.vector = new IntVector3(x, y, z);
+		super(tick);
 	}
 
 	@Override
@@ -41,12 +39,12 @@ public class TestPacket extends Packet
 	@Override
 	public Object open()
 	{
-		return this.vector;
+		return new Integer(this.tick);
 	}
 
 	@Override
 	public String toString()
 	{
-		return String.format("Packet %d: Test: %s", id, this.vector.toString());
+		return String.format("%s %d", formatString(id, "Test"), this.tick);
 	}
 }

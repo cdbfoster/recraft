@@ -27,7 +27,21 @@ public abstract class Packet implements Serializable
 {
 	public static int id = 0;
 
+	public static String formatString(int packetID, String packetName)
+	{
+		return String.format("Packet %d, %s:", packetID, packetName);
+	}
+
+	protected int tick;
+
+	public Packet(int tick)
+	{
+		this.tick = tick;
+	}
+
 	public int getId() { return id; }
+
+	public int getTick() { return this.tick; }
 
 	public Object open() { return null; }
 
