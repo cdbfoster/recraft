@@ -27,11 +27,6 @@ public abstract class Packet implements Serializable
 {
 	public static int id = 0;
 
-	public static String formatString(int packetID, String packetName)
-	{
-		return String.format("Packet %d, %s:", packetID, packetName);
-	}
-
 	protected int tick;
 
 	public Packet(int tick)
@@ -39,7 +34,7 @@ public abstract class Packet implements Serializable
 		this.tick = tick;
 	}
 
-	public int getId() { return id; }
+	public int getID() { return id; }
 
 	public int getTick() { return this.tick; }
 
@@ -47,4 +42,9 @@ public abstract class Packet implements Serializable
 
 	@Override
 	public abstract String toString();
+
+	protected static String formatString(int packetID, String packetName, int tick)
+	{
+		return String.format("Packet %d, %s  Tick: %d", packetID, packetName, tick);
+	}
 }

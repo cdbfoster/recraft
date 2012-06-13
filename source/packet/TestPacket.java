@@ -34,7 +34,7 @@ public class TestPacket extends Packet
 	}
 
 	@Override
-	public int getId() { return id; }
+	public int getID() { return id; }
 
 	@Override
 	public Object open()
@@ -45,6 +45,6 @@ public class TestPacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s %d", formatString(id, "Test"), this.tick);
+		return formatString(id, "Test", this.tick);
 	}
 }
