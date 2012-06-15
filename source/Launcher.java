@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 
+import math.IntVector;
+
 import recraft.core.*;
 import recraft.core.Configurator.ConfiguratorCreatable;
 import recraft.core.Configurator.ConfiguratorSelect;
@@ -35,7 +37,6 @@ import recraft.networkinterface.UDPNetworkInterface;
 import recraft.networknode.MinecraftServer;
 import recraft.packet.InputPacket;
 import recraft.packet.TestPacket;
-import recraft.util.IntVector;
 
 public class Launcher
 {
