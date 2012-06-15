@@ -35,7 +35,7 @@ import recraft.networkinterface.UDPNetworkInterface;
 import recraft.networknode.MinecraftServer;
 import recraft.packet.InputPacket;
 import recraft.packet.TestPacket;
-import recraft.util.IntVector3;
+import recraft.util.IntVector;
 
 public class Launcher
 {

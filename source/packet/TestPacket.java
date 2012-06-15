@@ -22,7 +22,7 @@
 package recraft.packet;
 
 import recraft.core.Packet;
-import recraft.util.IntVector3;
+import recraft.util.IntVector;
 
 public class TestPacket extends Packet
 {

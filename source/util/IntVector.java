@@ -23,83 +23,83 @@ package recraft.util;
 
 import java.io.Serializable;
 
-public class IntVector3 implements Serializable
+public class IntVector implements Serializable
 {
 	public int x;
 	public int y;
 	public int z;
 
-	public IntVector3(int x, int y, int z)
+	public IntVector(int x, int y, int z)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 
-	public IntVector3(IntVector3 b)
+	public IntVector(IntVector b)
 	{
 		this.x = b.x;
 		this.y = b.y;
 		this.z = b.z;
 	}
 
-	public IntVector3()
+	public IntVector()
 	{
 		this.x = 0;
 		this.y = 0;
 		this.z = 0;
 	}
 
-	public IntVector3 add(IntVector3 b)
+	public IntVector add(IntVector b)
 	{
-		return new IntVector3(this.x + b.x, this.y + b.y, this.z + b.z);
+		return new IntVector(this.x + b.x, this.y + b.y, this.z + b.z);
 	}
 
-	public IntVector3 add(int b)
+	public IntVector add(int b)
 	{
-		return new IntVector3(this.x + b, this.y + b, this.z + b);
+		return new IntVector(this.x + b, this.y + b, this.z + b);
 	}
 
-	public IntVector3 subtract(IntVector3 b)
+	public IntVector subtract(IntVector b)
 	{
-		return new IntVector3(this.x - b.x, this.y - b.y, this.z - b.z);
+		return new IntVector(this.x - b.x, this.y - b.y, this.z - b.z);
 	}
 
-	public IntVector3 subtract(int b)
+	public IntVector subtract(int b)
 	{
-		return new IntVector3(this.x - b, this.y - b, this.z - b);
+		return new IntVector(this.x - b, this.y - b, this.z - b);
 	}
 
-	public IntVector3 multiply(IntVector3 b)
+	public IntVector multiply(IntVector b)
 	{
-		return new IntVector3(this.x * b.x, this.y * b.y, this.z * b.z);
+		return new IntVector(this.x * b.x, this.y * b.y, this.z * b.z);
 	}
 
-	public IntVector3 multiply(int b)
+	public IntVector multiply(int b)
 	{
-		return new IntVector3(this.x * b, this.y * b, this.z * b);
+		return new IntVector(this.x * b, this.y * b, this.z * b);
 	}
 
-	public IntVector3 divide(IntVector3 b)
+	public IntVector divide(IntVector b)
 	{
-		return new IntVector3(this.x / b.x, this.y / b.y, this.z / b.z);
+		return new IntVector(this.x / b.x, this.y / b.y, this.z / b.z);
 	}
 
-	public IntVector3 divide(int b)
+	public IntVector divide(int b)
 	{
-		return new IntVector3(this.x / b, this.y / b, this.z / b);
+		return new IntVector(this.x / b, this.y / b, this.z / b);
 	}
 
 	/** Performs modulus division (%) between each element of the two vectors. */
-	public IntVector3 mod(IntVector3 b)
+	public IntVector mod(IntVector b)
 	{
-		return new IntVector3(this.x % b.x, this.y % b.y, this.z % b.z);
+		return new IntVector(this.x % b.x, this.y % b.y, this.z % b.z);
 	}
 
 	/** Performs modulus division (%) of each element of the vector and b. */
-	public IntVector3 mod(int b)
+	public IntVector mod(int b)
 	{
-		return new IntVector3(this.x % b, this.y % b, this.z % b);
+		return new IntVector(this.x % b, this.y % b, this.z % b);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class IntVector3 implements Serializable
 		if (this.getClass() != b.getClass())
 			return false;
 
-		IntVector3 c = (IntVector3)b;
+		IntVector c = (IntVector)b;
 
 		if (this.x != c.x)
 			return false;
