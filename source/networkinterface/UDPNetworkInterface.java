@@ -69,6 +69,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, LinkedList<Packet>>();
 
 		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
+		this.listener.setDaemon(true);
 		this.listener.start();
 
 		this.lock = new Object();
@@ -83,6 +84,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, LinkedList<Packet>>();
 
 		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
+		this.listener.setDaemon(true);
 		this.listener.start();
 
 		this.lock = new Object();
