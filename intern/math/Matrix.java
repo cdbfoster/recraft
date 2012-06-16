@@ -158,7 +158,7 @@ public class Matrix implements Serializable
 
 	public Ray multiply(Ray b)
 	{
-		return new Ray(this.multiply(b.origin), this.multiply(b.direction), b.minTime, b.maxTime, b.time);
+		return new Ray(this.multiply(b.origin), this.multiply(b.direction), b.minTime, b.maxTime);
 	}
 
 	public Vector multiply(Vector b)
