@@ -14,29 +14,28 @@ public class Ray implements Serializable
 {
 	public Vector origin;
 	public Vector direction;
-	float minTime, maxTime, time;
+	float minTime, maxTime;
 
 	public Ray()
 	{
 		this.origin = new Vector(0.0f, 0.0f, 0.0f);
 		this.direction = new Vector(0.0f, 0.0f, 1.0f);
-		this.minTime = 0.0f; this.maxTime = Float.POSITIVE_INFINITY; this.time = 0.0f;
+		this.minTime = 0.0f; this.maxTime = Float.POSITIVE_INFINITY;
 	}
 
 	public Ray(Vector origin, Vector direction)
 	{
 		this.origin = origin;
 		this.direction = direction.normalized();
-		this.minTime = 0.0f; this.maxTime = Float.POSITIVE_INFINITY; this.time = 0.0f;
+		this.minTime = 0.0f; this.maxTime = Float.POSITIVE_INFINITY;
 	}
 
-	public Ray(Vector origin, Vector direction, float minTime, float maxTime, float time)
+	public Ray(Vector origin, Vector direction, float minTime, float maxTime)
 	{
 		this.origin = origin;
 		this.direction = direction.normalized();
 		this.minTime = minTime;
 		this.maxTime = maxTime;
-		this.time = time;
 	}
 
 	public Vector at(float time)
@@ -94,12 +93,12 @@ public class Ray implements Serializable
 	@Override
 	public Ray clone()
 	{
-		return new Ray(this.origin.clone(), this.direction.clone(), this.minTime, this.maxTime, this.time);
+		return new Ray(this.origin.clone(), this.direction.clone(), this.minTime, this.maxTime);
 	}
 
 	@Override
 	public String toString()
 	{
-		return String.format("Origin: %s Direction: %s\nTime[%f, %f]: %f", this.origin.toString(), this.direction.toString(), this.minTime, this.maxTime, this.time);
+		return String.format("Origin: %s Direction: %s\nTime Range: [%f, %f]", this.origin.toString(), this.direction.toString(), this.minTime, this.maxTime);
 	}
 }
