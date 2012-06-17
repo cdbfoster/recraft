@@ -176,6 +176,6 @@ public class Vector implements Serializable
 	@Override
 	public String toString()
 	{
-		return String.format("( %d, %d, %d )", this.x, this.y, this.z);
+		return String.format("( %f, %f, %f )", this.x, this.y, this.z);
 	}
 }
