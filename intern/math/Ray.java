@@ -87,7 +87,10 @@ public class Ray implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return (17 * this.origin.hashCode() + this.direction.hashCode());
+		int hash = 17 * this.origin.hashCode() + this.direction.hashCode();
+		hash = 17 * hash + new Float(this.minTime).hashCode();
+		hash = 17 * hash + new Float(this.maxTime).hashCode();
+		return hash;
 	}
 
 	@Override
