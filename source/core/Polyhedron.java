@@ -30,6 +30,11 @@ public abstract class Polyhedron
 	protected Matrix transform;
 	protected Matrix transformInverse;
 
+	public Polyhedron()
+	{
+		this.clearTransform();
+	}
+
 	public void rotate(float radiansX, float radiansY, float radiansZ)
 	{
 		Matrix matrix = Matrix.rotate(radiansX, radiansY, radiansZ);
