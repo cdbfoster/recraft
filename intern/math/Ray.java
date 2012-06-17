@@ -14,7 +14,7 @@ public class Ray implements Serializable
 {
 	public Vector origin;
 	public Vector direction;
-	float minTime, maxTime;
+	public float minTime, maxTime;
 
 	public Ray()
 	{
