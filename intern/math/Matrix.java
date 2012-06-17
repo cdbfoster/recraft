@@ -129,6 +129,14 @@ public class Matrix implements Serializable
 		return new Vector(this.m[2][0], this.m[2][1], this.m[2][2]);
 	}
 
+	public Matrix as3x3()
+	{
+		return new Matrix(m[0][0], m[0][1], m[0][2], 0.0f,
+						  m[1][0], m[1][1], m[1][2], 0.0f,
+						  m[2][0], m[2][1], m[2][2], 0.0f,
+						  0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
 	public Matrix multiply(Matrix b)
 	{
 		Matrix result = new Matrix();
@@ -158,7 +166,7 @@ public class Matrix implements Serializable
 
 	public Ray multiply(Ray b)
 	{
-		return new Ray(this.multiply(b.origin), this.multiply(b.direction), b.minTime, b.maxTime);
+		return new Ray(this.multiply(b.origin), this.as3x3().multiply(b.direction), b.minTime, b.maxTime);
 	}
 
 	public Vector multiply(Vector b)
