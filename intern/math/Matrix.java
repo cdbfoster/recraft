@@ -131,9 +131,9 @@ public class Matrix implements Serializable
 
 	public Matrix as3x3()
 	{
-		return new Matrix(m[0][0], m[0][1], m[0][2], 0.0f,
-						  m[1][0], m[1][1], m[1][2], 0.0f,
-						  m[2][0], m[2][1], m[2][2], 0.0f,
+		return new Matrix(this.m[0][0], this.m[0][1], this.m[0][2], 0.0f,
+						  this.m[1][0], this.m[1][1], this.m[1][2], 0.0f,
+						  this.m[2][0], this.m[2][1], this.m[2][2], 0.0f,
 						  0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
