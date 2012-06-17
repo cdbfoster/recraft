@@ -45,4 +45,15 @@ public class Intersection
 		this.object = object;
 		this.time = time;
 	}
+
+	@Override
+	public String toString()
+	{
+		String objectLine;
+		if (this.object == null)
+			objectLine = "No object info.";
+		else
+			objectLine = String.format("Object Type: %s", this.object.getClass().getName());
+		return String.format("Hit Point: %s  Hit Normal: %s\nHit Time: %f  %s", this.point, this.normal, this.time, objectLine);
+	}
 }
