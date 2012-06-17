@@ -27,26 +27,34 @@ import math.Vector;
 
 public abstract class Polyhedron
 {
-	private Matrix transform;
+	protected Matrix transform;
+	protected Matrix transformInverse;
 
 	public void rotate(float radiansX, float radiansY, float radiansZ)
 	{
-		this.transform.multiply(Matrix.rotate(radiansX, radiansY, radiansZ));
+		Matrix matrix = Matrix.rotate(radiansX, radiansY, radiansZ);
+		this.transform = this.transform.multiply(matrix);
+		this.transformInverse = this.transformInverse.multiply(matrix.inverted());
 	}
 
 	public void scale(float scaleX, float scaleY, float scaleZ)
 	{
-		this.transform.multiply(Matrix.scale(scaleX, scaleY, scaleZ));
+		Matrix matrix = Matrix.scale(scaleX, scaleY, scaleZ);
+		this.transform = this.transform.multiply(matrix);
+		this.transformInverse = this.transformInverse.multiply(matrix.inverted());
 	}
 
 	public void translate(float translationX, float translationY, float translationZ)
 	{
-		this.transform.multiply(Matrix.translate(translationX, translationY, translationZ));
+		Matrix matrix = Matrix.translate(translationX, translationY, translationZ);
+		this.transform = this.transform.multiply(matrix);
+		this.transformInverse = this.transformInverse.multiply(matrix.inverted());
 	}
 
 	public void clearTransform()
 	{
 		this.transform = new Matrix();
+		this.transformInverse = new Matrix();
 	}
 
 	/** Returns true if ray intersects this polyhedron */
@@ -69,4 +77,18 @@ public abstract class Polyhedron
 	public abstract Vector slideSphere(Ray ray, float radius);
 	/** Returns the slide vector of the given polyhedron if it were to collide with and then slide along the surface of this polyhedron.  Returns null if there was no collision. */
 	public abstract Vector slidePolyhedron(Ray ray, Polyhedron polyhedron);
+
+	protected static class Plane
+	{
+		public Vector origin;
+		public Vector normal;
+		public float worldOriginDistance;
+
+		public Plane(Vector origin, Vector normal)
+		{
+			this.origin = origin;
+			this.normal = normal;
+			this.worldOriginDistance = origin.dot(normal);
+		}
+	}
 }
