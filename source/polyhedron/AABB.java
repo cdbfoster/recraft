@@ -139,7 +139,10 @@ public class AABB extends Polyhedron
 	@Override
 	public boolean intersectPolyhedron(Ray ray, Polyhedron polyhedron)
 	{
-		// TODO Auto-generated method stub
+		// Optimize this case
+		if (polyhedron instanceof AABB)
+			return this.intersectAABB(ray, (AABB)polyhedron);
+
 		return false;
 	}
 
@@ -299,6 +302,48 @@ public class AABB extends Polyhedron
 			return true;
 
 		return false;
+	}
+
+	private boolean intersectAABB(Ray ray, AABB aabb)
+	{
+		// Bring the other AABB data into the space of this AABB
+		Ray r = this.transformInverse.multiply(ray);
+		Vector otherLowCorner = this.transformInverse.multiply(ray.origin.add(aabb.getLowCorner()));
+		Vector otherHighCorner = this.transformInverse.multiply(ray.origin.add(aabb.getHighCorner()));
+
+		if (this.overlapAABB(otherLowCorner, otherHighCorner))
+			return true;
+
+		// The time per axis at which aabb starts intersecting this AABB
+		Vector t0 = new Vector(0.0f, 0.0f, 0.0f);
+		// The time per axis at which aabb stops intersecting this AABB
+		Vector t1 = new Vector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+
+		for (int axis = 0; axis < 3; axis++)
+		{
+			float thisMin = this.lowCorner.get(axis);
+			float otherMin = otherLowCorner.get(axis);
+
+			float thisMax = this.highCorner.get(axis);
+			float otherMax = otherHighCorner.get(axis);
+
+			float rDirection = r.direction.get(axis);
+
+			if (thisMax < otherMin && rDirection < 0.0f)
+				t0.set(axis, (thisMax - otherMin) / rDirection);
+			else if (thisMin > otherMax && rDirection > 0.0f)
+				t0.set(axis, (thisMin - otherMax) / rDirection);
+
+			if (thisMin < otherMax && rDirection < 0.0f)
+				t1.set(axis, (thisMin - otherMax) / rDirection);
+			else if (thisMax > otherMin && rDirection > 0.0f)
+				t1.set(axis, (thisMax - otherMin) / rDirection);
+		}
+
+		float time0 = Math.max(t0.x, Math.max(t0.y, t0.z));
+		float time1 = Math.min(t1.x, Math.min(t1.y, t1.z));
+
+		return !(time0 > time1);
 	}
 
 	private Intersection castAABB(Ray ray, AABB aabb)
