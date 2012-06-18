@@ -35,6 +35,8 @@ public abstract class Polyhedron
 		this.clearTransform();
 	}
 
+	// TODO Probably add some facility to retrieve vertex/face info
+
 	public void rotate(float radiansX, float radiansY, float radiansZ)
 	{
 		Matrix matrix = Matrix.rotate(radiansX, radiansY, radiansZ);
