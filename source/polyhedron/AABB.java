@@ -28,8 +28,8 @@ import recraft.core.Polyhedron;
 
 public class AABB extends Polyhedron
 {
-	public final Vector lowCorner;
-	public final Vector highCorner;
+	private Vector lowCorner;
+	private Vector highCorner;
 
 	public AABB(Vector lowCorner, Vector highCorner)
 	{
@@ -234,7 +234,10 @@ public class AABB extends Polyhedron
 	@Override
 	public Intersection castPolyhedron(Ray ray, Polyhedron polyhedron)
 	{
-		// TODO Auto-generated method stub
+		// Optimize this case
+		if (polyhedron instanceof AABB)
+			return this.castAABB(ray, (AABB)polyhedron);
+
 		return null;
 	}
 
@@ -245,7 +248,10 @@ public class AABB extends Polyhedron
 		if (intersection == null)
 			return null;
 
-		return intersection.normal.cross(ray.direction.cross(intersection.normal).normalized());
+		Vector directionXNormal = ray.direction.cross(intersection.normal);
+		if (directionXNormal.isZero())
+			return new Vector();
+		return intersection.normal.cross(directionXNormal.normalized());
 	}
 
 	@Override
@@ -258,8 +264,114 @@ public class AABB extends Polyhedron
 	@Override
 	public Vector slidePolyhedron(Ray ray, Polyhedron polyhedron)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Intersection intersection = this.castPolyhedron(ray, polyhedron);
+		if (intersection == null)
+			return null;
+
+		Vector directionXNormal = ray.direction.cross(intersection.normal);
+		if (directionXNormal.isZero())
+			return new Vector();
+		return intersection.normal.cross(directionXNormal.normalized());
+	}
+
+	public Vector getLowCorner()
+	{
+		return this.transform.multiply(lowCorner);
+	}
+
+	public Vector getHighCorner()
+	{
+		return this.transform.multiply(highCorner);
+	}
+
+	private boolean overlapAABB(Vector otherLowCorner, Vector otherHighCorner)
+	{
+		Vector thisExtent = this.highCorner.subtract(this.lowCorner).divide(2.0f);
+		Vector thisCenter = thisExtent.add(this.lowCorner);
+		Vector otherExtent = otherHighCorner.subtract(otherLowCorner).divide(2.0f);
+		Vector otherCenter = otherExtent.add(otherLowCorner);
+
+		Vector centerOffset = otherCenter.subtract(thisCenter);
+
+		if ((Math.abs(centerOffset.x) <= thisExtent.x + otherExtent.x) &&
+			(Math.abs(centerOffset.y) <= thisExtent.y + otherExtent.y) &&
+			(Math.abs(centerOffset.z) <= thisExtent.z + otherExtent.z))
+			return true;
+
+		return false;
+	}
+
+	private Intersection castAABB(Ray ray, AABB aabb)
+	{
+		// Bring the other AABB data into the space of this AABB
+		Ray r = this.transformInverse.multiply(ray);
+		Vector otherLowCorner = this.transformInverse.multiply(ray.origin.add(aabb.getLowCorner()));
+		Vector otherHighCorner = this.transformInverse.multiply(ray.origin.add(aabb.getHighCorner()));
+
+		if (this.overlapAABB(otherLowCorner, otherHighCorner))
+			return new Intersection(new Vector(0.0f, 0.0f, 0.0f), ray.direction.multiply(-1.0f), this, 0.0f);
+
+		// The time per axis at which aabb starts intersecting this AABB
+		Vector t0 = new Vector(0.0f, 0.0f, 0.0f);
+		// The time per axis at which aabb stops intersecting this AABB
+		Vector t1 = new Vector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+
+		for (int axis = 0; axis < 3; axis++)
+		{
+			float thisMin = this.lowCorner.get(axis);
+			float otherMin = otherLowCorner.get(axis);
+
+			float thisMax = this.highCorner.get(axis);
+			float otherMax = otherHighCorner.get(axis);
+
+			float rDirection = r.direction.get(axis);
+
+			if (thisMax < otherMin && rDirection < 0.0f)
+				t0.set(axis, (thisMax - otherMin) / rDirection);
+			else if (thisMin > otherMax && rDirection > 0.0f)
+				t0.set(axis, (thisMin - otherMax) / rDirection);
+
+			if (thisMin < otherMax && rDirection < 0.0f)
+				t1.set(axis, (thisMin - otherMax) / rDirection);
+			else if (thisMax > otherMin && rDirection > 0.0f)
+				t1.set(axis, (thisMax - otherMin) / rDirection);
+		}
+
+		float time0 = Math.max(t0.x, Math.max(t0.y, t0.z));
+		float time1 = Math.min(t1.x, Math.min(t1.y, t1.z));
+
+		if (time0 > time1)
+			return null;
+
+		// Get the index of the colliding axis
+		int maxAxis = 0;
+		float directionSign = 1.0f;
+		float currentMax = 0.0f;
+		for (int axis = 0; axis < 3; axis++)
+		{
+			if (t0.get(axis) > currentMax)
+			{
+				maxAxis = axis;
+				directionSign = (r.direction.get(axis) > 0.0f ? -1.0f : 1.0f);
+				currentMax = t0.get(axis);
+			}
+		}
+
+		otherLowCorner = otherLowCorner.add(r.direction.multiply(time0));
+		otherHighCorner = otherHighCorner.add(r.direction.multiply(time0));
+
+		Vector intersectionLowCorner = new Vector(Math.max(this.lowCorner.x, otherLowCorner.x), Math.max(this.lowCorner.y, otherLowCorner.y), Math.max(this.lowCorner.z, otherLowCorner.z));
+		Vector intersectionHighCorner = new Vector(Math.min(this.highCorner.x, otherHighCorner.x), Math.min(this.highCorner.y, otherHighCorner.y), Math.min(this.highCorner.z, otherHighCorner.z));
+
+		// The center of the colliding area
+		Vector point = intersectionHighCorner.subtract(intersectionLowCorner).divide(2.0f).add(intersectionLowCorner);
+		point.set(maxAxis, this.highCorner.multiply(directionSign).get(maxAxis));
+
+		Vector mask = new Vector(0.0f, 0.0f, 0.0f);
+		mask.set(maxAxis, 1.0f);
+		Vector normal = mask.multiply(directionSign);
+
+		return new Intersection(this.transform.multiply(point), this.transform.as3x3().multiply(normal).normalized(), this, time0);
 	}
 
 }
