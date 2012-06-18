@@ -37,6 +37,28 @@ public class Vector implements Serializable
 		this.z = 0.0f;
 	}
 
+	public float get(int index)
+	{
+		if (index == 0)
+			return this.x;
+		else if (index == 1)
+			return this.y;
+		else if (index == 2)
+			return this.z;
+		else
+			return 0.0f;
+	}
+
+	public void set(int index, float value)
+	{
+		if (index == 0)
+			this.x = value;
+		else if (index == 1)
+			this.y = value;
+		else if (index == 2)
+			this.z = value;
+	}
+
 	public Vector add(Vector b)
 	{
 		return new Vector(this.x + b.x, this.y + b.y, this.z + b.z);
