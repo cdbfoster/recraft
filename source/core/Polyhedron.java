@@ -56,6 +56,16 @@ public abstract class Polyhedron
 		this.transformInverse = this.transformInverse.multiply(matrix.inverted());
 	}
 
+	public void setTransform(Matrix transform)
+	{
+		this.transform = transform.clone();
+	}
+
+	public Matrix getTransform()
+	{
+		return this.transform.clone();
+	}
+
 	public void clearTransform()
 	{
 		this.transform = new Matrix();
