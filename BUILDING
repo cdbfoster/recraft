@@ -1,0 +1,25 @@
+Currently, building is only supported using the Eclipse IDE <eclipse.org> on
+Linux.  If you can provide building instructions for other environments/OSes,
+please email me at <cdbfoster@gmail.com>.
+
+To build/run the project:
+
+1.	Create the project directory:
+		$ mkdir recraft/
+		$ cd recraft/
+
+2.	Clone the repository (should now have recraft/recraft/):
+		$ git clone git://github.com/cdbfoster/recraft.git
+
+3.	Download the Eclipse project settings from:
+		https://github.com/downloads/cdbfoster/recraft/eclipse_setup.zip
+	and extract the eclipse_setup/ folder into recraft/ (the parent recraft/,
+	not the repository)
+
+4.	Start Eclipse and point the workspace prompt to eclipse_setup/.
+
+5.	Click File > Import... and under General, select Existing Projects into Workspace.
+	Click Next>.
+
+6.	Click the green and white Run button at the top of the workspace.
+
