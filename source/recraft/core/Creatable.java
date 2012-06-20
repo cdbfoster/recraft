@@ -28,6 +28,8 @@ public interface Creatable
 
 	public static class CreatableException extends Exception
 	{
+		private static final long serialVersionUID = 214203664202025091L;
+
 		public CreatableException()
 		{
 			super();

@@ -25,6 +25,8 @@ import java.io.Serializable;
 
 public class Input implements Serializable
 {
+	private static final long serialVersionUID = 5286237990318153917L;
+
 	public static enum Type {MOVE_DIRECTION, LOOK_DIRECTION,
 		ATTACK, USE, INVENTORY, JUMP, RUN, CROUCH, DROP, CHAT, ESCAPE}
 

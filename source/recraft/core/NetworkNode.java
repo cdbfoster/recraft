@@ -21,8 +21,6 @@
 
 package recraft.core;
 
-import recraft.core.Configurator.*;
-
 public abstract class NetworkNode implements Runnable, Creatable
 {
 	// Create the following method in implementing classes:

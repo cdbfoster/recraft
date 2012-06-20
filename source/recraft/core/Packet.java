@@ -25,6 +25,8 @@ import java.io.Serializable;
 
 public abstract class Packet implements Serializable
 {
+	private static final long serialVersionUID = 7062869197030553036L;
+
 	public static int id = 0;
 
 	protected int tick;

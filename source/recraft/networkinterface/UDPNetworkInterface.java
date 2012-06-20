@@ -136,7 +136,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 				return false;
 
 			// Send each packet in the queue
-			ListIterator packetIterator = this.outgoingPackets.listIterator();
+			ListIterator<NodePacketPair> packetIterator = this.outgoingPackets.listIterator();
 			while (packetIterator.hasNext())
 			{
 				NodePacketPair pair = (NodePacketPair)packetIterator.next();
@@ -145,7 +145,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 			this.outgoingPackets.clear();
 		}
-		return true;
+		return totalSuccess;
 	}
 
 	@Override

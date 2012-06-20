@@ -38,7 +38,7 @@ public class Configurator
 		try
 		{
 			ConfiguratorSelect select = null;
-			ConfiguratorIntRange intRange = null;
+			//ConfiguratorIntRange intRange = null;
 
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
@@ -49,7 +49,7 @@ public class Configurator
 			select = Configurator.addSelect("Options.Network.Network Nodes.Server.Node Type");
 			select.addItem(new ConfiguratorCreatable("Minecraft Server", MinecraftServer.class));
 
-			intRange = Configurator.addIntRange("Options.Network.Network Nodes.Server.Bind Port", 1024, 65535, 25565);
+			Configurator.addIntRange("Options.Network.Network Nodes.Server.Bind Port", 1024, 65535, 25565);
 
 		}
 		catch (Exception e)
@@ -254,9 +254,9 @@ public class Configurator
 	public static class ConfiguratorCreatable
 	{
 		private String name;
-		private Class creatable;
+		private Class<?> creatable;
 
-		public ConfiguratorCreatable(String name, Class creatable) throws CreatableException
+		public ConfiguratorCreatable(String name, Class<?> creatable) throws CreatableException
 		{
 			if (!Creatable.class.isAssignableFrom(creatable))
 				throw new CreatableException("Class does not implement the Creatable interface");
@@ -268,7 +268,7 @@ public class Configurator
 		public Object create(Object[] parameters)
 		{
 			// Extract class objects from parameters
-			Class[] parameterClasses = null;
+			Class<?>[] parameterClasses = null;
 			if (parameters != null)
 			{
 				parameterClasses = new Class[parameters.length];

@@ -27,6 +27,8 @@ import java.net.UnknownHostException;
 
 public final class NetworkNodeIdentifier implements Serializable
 {
+	private static final long serialVersionUID = 419254874403174733L;
+	
 	public final InetAddress inetAddress;
 	public final int port;
 

@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 public class Matrix implements Serializable
 {
+	private static final long serialVersionUID = -8921412792080681557L;
+	
 	public float[][] m;
 
 	private void setIdentity()

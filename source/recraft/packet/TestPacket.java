@@ -21,11 +21,12 @@
 
 package recraft.packet;
 
-import math.IntVector;
 import recraft.core.Packet;
 
 public class TestPacket extends Packet
 {
+	private static final long serialVersionUID = 4083643734102984081L;
+	
 	public static int id = 0;
 
 	public TestPacket(int tick)

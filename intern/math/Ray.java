@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 public class Ray implements Serializable
 {
+	private static final long serialVersionUID = -7060239033050818584L;
+	
 	public Vector origin;
 	public Vector direction;
 	public float minTime, maxTime;

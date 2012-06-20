@@ -83,7 +83,7 @@ public class MinecraftServer extends NetworkNode implements Creatable
 			// Try to read them
 			synchronized (incomingPackets)
 			{
-				ListIterator packetIterator = incomingPackets.listIterator();
+				ListIterator<NodePacketPair> packetIterator = incomingPackets.listIterator();
 				while (packetIterator.hasNext())
 				{
 					NodePacketPair pair = (NodePacketPair)packetIterator.next();

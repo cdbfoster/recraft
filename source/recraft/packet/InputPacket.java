@@ -26,6 +26,8 @@ import recraft.core.Packet;
 
 public class InputPacket extends Packet
 {
+	private static final long serialVersionUID = 6103242153381881276L;
+
 	public static int id = 1;
 
 	private Input input;
