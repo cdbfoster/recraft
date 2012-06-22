@@ -23,15 +23,10 @@ package recraft.core;
 
 public abstract class NetworkNode implements Runnable, Creatable
 {
-	// Create the following method in implementing classes:
-	// public static ImplementingClass create();
+	// Create the following method in derived classes:
+	// public static DerivedClass create();
 
 	protected NetworkInterface networkInterface;
-
-	public NetworkNode()
-	{
-
-	}
 
 	@Override
 	public abstract void run();

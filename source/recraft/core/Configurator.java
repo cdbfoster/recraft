@@ -38,8 +38,7 @@ public class Configurator
 		try
 		{
 			ConfiguratorSelect select = null;
-			//ConfiguratorIntRange intRange = null;
-
+			
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
 
