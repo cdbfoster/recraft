@@ -26,6 +26,11 @@ import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+
 import math.Matrix;
 import math.Ray;
 import math.Vector;
@@ -46,31 +51,24 @@ public class Launcher
 
 	public static void main(String[] args) throws Exception
 	{
-		//*
+		/*
 		// TODO Make log class, start on world/population and the control thereof (start with input device)
-		AABB a = new AABB(new Vector(-5, -5, -5), new Vector(5, 5, 5));
-		//a.scale(1.0f, 0.2f, 0.2f);
-		a.translate(15, 15, 15);
-
-		AABB b = new AABB(new Vector(-1, -2, -1), new Vector(1, 2, 1));
-
-		System.out.println(a.intersectPolyhedron(new Ray(new Vector(0, 0, 15), new Vector(20f, 8.0f, 0)), b));
+		
 		/*/
 		MinecraftServer server = new MinecraftServer();
 		Thread serverThread = new Thread(server);
 		serverThread.start();
-
+		
 		ConfiguratorCreatable interfaceCreator = (ConfiguratorCreatable)((ConfiguratorSelect)Configurator.get("Options.Network.Network Interface")).getValue();
 		NetworkInterface clientInterface = (NetworkInterface)interfaceCreator.create(null);
 
-		Packet packet = new InputPacket(1, new Input());
-		clientInterface.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-		packet = new TestPacket(82);
-		clientInterface.enqueuePacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-
-		clientInterface.sendPacketQueue();
-
-		Thread.sleep(1000);
+		for (int i = 0; i < 20; i++)
+		{
+			Packet packet = new TestPacket(i);
+			clientInterface.sendPacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
+		}
+		
+		Thread.sleep(500);
 
 		clientInterface.close();
 		server.stop();
