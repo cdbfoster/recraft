@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 /** Handles sending and receiving of Packets to and from specified network nodes. */
-public interface NetworkInterface
+public interface NetworkInterface extends Creatable
 {
 	// Create the following methods in implementing classes:
 	// public static ImplementingClass create();
