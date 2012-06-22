@@ -42,8 +42,11 @@ public class Configurator
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
 
-			select = Configurator.addSelect("Options.Network.Network Nodes.Client");
+			select = Configurator.addSelect("Options.Network.Network Nodes.Client.Node Type");
 			//select.addItem(new ConfiguratorCreatable("Minecraft Client", MinecraftClient.class));
+			
+			select = Configurator.addSelect("Options.Network.Network Nodes.Client.Input Device");
+			
 
 			select = Configurator.addSelect("Options.Network.Network Nodes.Server.Node Type");
 			select.addItem(new ConfiguratorCreatable("Minecraft Server", MinecraftServer.class));
@@ -59,89 +62,36 @@ public class Configurator
 
 	public static ConfiguratorSelect addSelect(String path)
 	{
-		// Delimit around "."
-		String[] splitPath = path.split("\\.");
-
-		// Path must contain a top level group
-		if (splitPath.length <= 1)
-			return null;
-
-		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
-
-		String name = splitPath[splitPath.length - 1];
-
-		if (containingGroup.items.containsKey(name))
-		{
-			Object object = containingGroup.items.get(name);
-			if (object instanceof ConfiguratorSelect)
-				return (ConfiguratorSelect)object;
-			else
-				return null;
-		}
-		else
-		{
-			ConfiguratorSelect select = new ConfiguratorSelect(name, new ArrayList<Object>());
-			containingGroup.items.put(name, select);
-			return select;
-		}
+		ConfiguratorSelect select = new ConfiguratorSelect(getNameFromPath(path), new ArrayList<Object>());
+		return (ConfiguratorSelect)addObject(path, select);
 	}
 
 	public static ConfiguratorIntRange addIntRange(String path, int rangeLow, int rangeHigh, int defaultValue)
 	{
-		String[] splitPath = path.split("\\.");
-		if (splitPath.length <= 1)
-			return null;
-
-		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
-
-		String name = splitPath[splitPath.length - 1];
-
-		if (containingGroup.items.containsKey(name))
-		{
-			Object object = containingGroup.items.get(name);
-			if (object instanceof ConfiguratorIntRange)
-				return (ConfiguratorIntRange)object;
-			else
-				return null;
-		}
-		else
-		{
-			ConfiguratorIntRange intRange = new ConfiguratorIntRange(name, rangeLow, rangeHigh, defaultValue);
-			containingGroup.items.put(name, intRange);
-			return intRange;
-		}
+		ConfiguratorIntRange intRange = new ConfiguratorIntRange(getNameFromPath(path), rangeLow, rangeHigh, defaultValue);
+		return (ConfiguratorIntRange)addObject(path, intRange);
 	}
 
 	public static ConfiguratorFloatRange addFloatRange(String path, float rangeLow, float rangeHigh, float defaultValue)
 	{
-		String[] splitPath = path.split("\\.");
-		if (splitPath.length <= 1)
-			return null;
-
-		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
-
-		String name = splitPath[splitPath.length - 1];
-
-		if (containingGroup.items.containsKey(name))
-		{
-			Object object = containingGroup.items.get(name);
-			if (object instanceof ConfiguratorFloatRange)
-				return (ConfiguratorFloatRange)object;
-			else
-				return null;
-		}
-		else
-		{
-			ConfiguratorFloatRange floatRange = new ConfiguratorFloatRange(name, rangeLow, rangeHigh, defaultValue);
-			containingGroup.items.put(name, floatRange);
-			return floatRange;
-		}
+		ConfiguratorFloatRange floatRange = new ConfiguratorFloatRange(getNameFromPath(path), rangeLow, rangeHigh, defaultValue);
+		return (ConfiguratorFloatRange)addObject(path, floatRange);
+	}
+	
+	public static boolean addLink(String source, String destination)
+	{
+		Object object = get(source);
+		if (object == null)
+			return false;
+		
+		if (addObject(destination, object) == null)
+			return false;
+		return true;
 	}
 
 	public static Object get(String path)
 	{
-		String[] splitPath = path.split("\\.");
-		ConfiguratorGroup containingGroup = getContainingGroup(splitPath);
+		ConfiguratorGroup containingGroup = getContainingGroup(path);
 
 		HashMap<String, Object> containingMap = null;
 
@@ -150,11 +100,12 @@ public class Configurator
 		else
 			containingMap = containingGroup.items;
 
-		return containingMap.get(splitPath[splitPath.length - 1]);
+		return containingMap.get(getNameFromPath(path));
 	}
 
-	private static ConfiguratorGroup getContainingGroup(String[] splitPath)
+	private static ConfiguratorGroup getContainingGroup(String path)
 	{
+		String[] splitPath = path.split("\\.");
 		// Traverse the configurations until right before the last path segment
 		ConfiguratorGroup currentGroup = null;
 		for (int index = 0; index < splitPath.length - 1; index++)
@@ -181,6 +132,39 @@ public class Configurator
 			}
 		}
 		return currentGroup;
+	}
+	
+	private static String getNameFromPath(String path)
+	{
+		// Delimit around "."
+		String[] splitPath = path.split("\\.");
+		if (splitPath.length == 0)
+			return "";
+		
+		return splitPath[splitPath.length - 1];
+	}
+	
+	private static Object addObject(String path, Object newObject)
+	{
+		ConfiguratorGroup containingGroup = getContainingGroup(path);
+		if (containingGroup == null)
+			return null;
+
+		String name = getNameFromPath(path);
+
+		if (containingGroup.items.containsKey(name))
+		{
+			Object object = containingGroup.items.get(name);
+			if (newObject.getClass().isInstance(object)) //if (object instanceof newObject.class)
+				return object;
+			else
+				return null;
+		}
+		else
+		{
+			containingGroup.items.put(name, newObject);
+			return newObject;
+		}
 	}
 
 	public static class ConfiguratorGroup
