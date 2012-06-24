@@ -23,8 +23,6 @@ package recraft.core;
 
 import java.io.Serializable;
 
-import math.Constants;
-
 public class Input implements Serializable
 {
 	private static final long serialVersionUID = 5286237990318153917L;
@@ -46,12 +44,7 @@ public class Input implements Serializable
 
 	public void setDirection(Input.Type type, float x, float y)
 	{
-		// Normalize
-		float length = (float)Math.sqrt(x * x + y * y);
-		x /= length;
-		y /= length;
-
-		// Clamp tiny imprecision
+		// Clamp to [-1.0, 1.0]
 		if (x > 1.0f)
 			x = 1.0f;
 		else if (x < -1.0f)
@@ -77,45 +70,35 @@ public class Input implements Serializable
 	public float getDirectionX(Input.Type type)
 	{
 		float x = 0.0f;
-		float y = 0.0f;
 
 		switch (type)
 		{
 		case MOVE_DIRECTION:
 			x = this.moveX / 32767.0f;
-			y = this.moveY / 32767.0f;
 			break;
 		case LOOK_DIRECTION:
 			x = this.lookX / 32767.0f;
-			y = this.lookY / 32767.0f;
 			break;
 		}
 
-		// Normalize for good measure
-		float length = (float)Math.sqrt(x * x + y * y);
-		return (length > Constants.FLT_EPSILON ? (x / length) : (0.0f));
+		return x;
 	}
 
 	public float getDirectionY(Input.Type type)
 	{
-		float x = 0.0f;
 		float y = 0.0f;
 
 		switch (type)
 		{
 		case MOVE_DIRECTION:
-			x = this.moveX / 32767.0f;
 			y = this.moveY / 32767.0f;
 			break;
 		case LOOK_DIRECTION:
-			x = this.lookX / 32767.0f;
 			y = this.lookY / 32767.0f;
 			break;
 		}
 
-		// Normalize for good measure
-		float length = (float)Math.sqrt(x * x + y * y);
-		return (length > Constants.FLT_EPSILON) ? (y / length) : (0.0f);
+		return y;
 	}
 
 	public void setValue(Input.Type type, int value)
