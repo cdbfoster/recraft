@@ -30,7 +30,8 @@ public class Input implements Serializable
 	private static final long serialVersionUID = 5286237990318153917L;
 
 	public static enum Type {MOVE_DIRECTION, LOOK_DIRECTION, ATTACK, USE,
-		INVENTORY, JUMP, RUN, CROUCH, DROP, CHAT, ESCAPE, SELECT_ITEM_ABS, SELECT_ITEM_REL}
+		INVENTORY, JUMP, RUN, CROUCH, DROP, CHAT, ESCAPE, SELECT_ITEM_ABS, SELECT_ITEM_REL,
+		PICK_BLOCK, LIST_PLAYERS, ZOOM}
 
 	private short moveX, moveY;
 	private short lookX, lookY;
