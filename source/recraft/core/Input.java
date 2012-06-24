@@ -34,7 +34,8 @@ public class Input implements Serializable
 
 	private short moveX, moveY;
 	private short lookX, lookY;
-	private byte selectIndex;
+	private byte selectItemAbs;
+	private byte selectItemRel;
 	private short active;
 
 	public Input()
@@ -44,10 +45,12 @@ public class Input implements Serializable
 
 	public void setDirection(Input.Type type, float x, float y)
 	{
+		// Normalize
 		float length = (float)Math.sqrt(x * x + y * y);
 		x /= length;
 		y /= length;
 
+		// Clamp tiny imprecision
 		if (x > 1.0f)
 			x = 1.0f;
 		else if (x < -1.0f)
@@ -118,14 +121,11 @@ public class Input implements Serializable
 	{
 		switch (type)
 		{
-		case SELECT_ITEM_ABS: // Set the last seven bits of selectIndex
-			this.selectIndex = (byte)((this.selectIndex & 0x80) | (value & 0x7F));
+		case SELECT_ITEM_ABS:
+			this.selectItemAbs = (byte)value;
 			break;
-		case SELECT_ITEM_REL: // Set the first bit of selectIndex
-			if (value > 0)
-				this.selectIndex |= 0x80;
-			else
-				this.selectIndex &= 0x7f;
+		case SELECT_ITEM_REL:
+			this.selectItemRel = (byte)value;
 			break;
 		}
 	}
@@ -134,10 +134,10 @@ public class Input implements Serializable
 	{
 		switch (type)
 		{
-		case SELECT_ITEM_ABS: // Return the last seven bits of selectIndex
-			return this.selectIndex & 0x7F;
-		case SELECT_ITEM_REL: // Use the first bit of selectIndex to determine direction
-			return (this.selectIndex & 0x80) != 0 ? 1 : -1;
+		case SELECT_ITEM_ABS:
+			return this.selectItemAbs;
+		case SELECT_ITEM_REL:
+			return this.selectItemRel;
 		}
 
 		return 0;
