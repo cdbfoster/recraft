@@ -153,7 +153,7 @@ public class Input implements Serializable
 	@Override
 	public String toString()
 	{
-		String string = String.format("Move: %d, %d\nLook: %d, %d\n", this.moveX, this.moveY, this.lookX, this.lookY);
+		String string = String.format("Move: %d, %d Look: %d, %d\nSelect Item: (Abs)%d (Rel)%d\n", this.moveX, this.moveY, this.lookX, this.lookY, this.selectItemAbs, this.selectItemRel);
 
 		for (int i = 0; i < 16; i++)
 			if ((this.active & (0x0001 << i)) == 0)
