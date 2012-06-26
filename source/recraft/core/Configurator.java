@@ -39,6 +39,8 @@ public class Configurator
 		{
 			ConfiguratorSelect select = null;
 			
+			select = Configurator.addSelect("Options.Input.Main Input Device");
+			
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
 
