@@ -32,6 +32,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import recraft.core.Configurator;
+import recraft.core.Configurator.ConfiguratorInputDevice;
 import recraft.core.Configurator.ConfiguratorSelect;
 import recraft.core.Creatable;
 import recraft.core.Input;
@@ -48,6 +49,8 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		ATTACK, USE, INVENTORY, JUMP, RUN, CROUCH, DROP, CHAT, ESCAPE, PICK_BLOCK, LIST_PLAYERS, ZOOM,
 		SELECT_ITEM_ABS_1, SELECT_ITEM_ABS_2, SELECT_ITEM_ABS_3, SELECT_ITEM_ABS_4, SELECT_ITEM_ABS_5, SELECT_ITEM_ABS_6, SELECT_ITEM_ABS_7, SELECT_ITEM_ABS_8, SELECT_ITEM_ABS_9,
 		SELECT_ITEM_REL_UP, SELECT_ITEM_REL_DOWN}
+
+	private boolean isReceiving;
 
 	public static LWJGLKeyboardMouse create()
 	{
@@ -97,8 +100,26 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 				 /*SELECT_ITEM_REL_UP*/new DirectionBinding(DirectionBinding.Type.MOUSE_AXIS_Z, -1, this.mouseEvents, this.keyboardEvents)};
 		this.bindings[BindingType.RUN.ordinal()] = new DoubleTapBinding(this.bindings[BindingType.MOVE_FORWARD.ordinal()], 350);
 
+		this.isReceiving = false;
+
 		ConfiguratorSelect select = (ConfiguratorSelect)Configurator.get("Options.Input.Main Input Device");
 		select.addItem(this.getName());
+
+		ConfiguratorInputDevice config = Configurator.addInputDevice("Options.Input.Input Devices", new ConfiguratorInputDevice(this));
+		config.addBinding("Attack", this.bindings[BindingType.ATTACK.ordinal()]);
+		config.addBinding("Use Item", this.bindings[BindingType.USE.ordinal()]);
+		config.addBinding("Forward", this.bindings[BindingType.MOVE_FORWARD.ordinal()]);
+		config.addBinding("Left", this.bindings[BindingType.MOVE_LEFT.ordinal()]);
+		config.addBinding("Back", this.bindings[BindingType.MOVE_BACKWARD.ordinal()]);
+		config.addBinding("Right", this.bindings[BindingType.MOVE_RIGHT.ordinal()]);
+		config.addBinding("Jump", this.bindings[BindingType.JUMP.ordinal()]);
+		config.addBinding("Sneak", this.bindings[BindingType.CROUCH.ordinal()]);
+		config.addBinding("Drop", this.bindings[BindingType.DROP.ordinal()]);
+		config.addBinding("Inventory", this.bindings[BindingType.INVENTORY.ordinal()]);
+		config.addBinding("Chat", this.bindings[BindingType.CHAT.ordinal()]);
+		config.addBinding("List Players", this.bindings[BindingType.LIST_PLAYERS.ordinal()]);
+		config.addBinding("Pick Block", this.bindings[BindingType.PICK_BLOCK.ordinal()]);
+		config.addBinding("Zoom", this.bindings[BindingType.ZOOM.ordinal()]);
 	}
 
 	@Override
@@ -110,7 +131,7 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 	@Override
 	public Input getInputState()
 	{
-		if (!this.isValid())
+		if (!this.isValid() || this.isReceiving)
 			return null;
 
 		try
@@ -221,6 +242,60 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 	}
 
 	@Override
+	public boolean receiveBinding(InputBinding binding)
+	{
+		if (!this.isValid() || this.isReceiving)
+			return false;
+
+		this.isReceiving = true;
+
+		int index = -1;
+		for (int i = 0; i < this.bindings.length; i++)
+			if (this.bindings[i] == binding)
+				index = i;
+		if (index == -1)
+			return false; // This input device does not contain the given binding.
+
+		do
+		{
+			try
+			{
+				Display.processMessages();
+
+				this.mouseEvents.clear();
+				this.keyboardEvents.clear();
+				// Read out keyboard and mouse events for the bindings to look at.
+				while (Mouse.next())
+					this.mouseEvents.add(new MouseEvent()); // All info is taken from the current event during construction
+				while (Keyboard.next())
+					this.keyboardEvents.add(new KeyboardEvent()); // All info is taken from the current event during construction
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			boolean breakOut = false;
+			ListIterator<KeyboardEvent> eventIterator = this.keyboardEvents.listIterator();
+			while (eventIterator.hasNext())
+				if (eventIterator.next().key == Keyboard.KEY_ESCAPE)
+				{
+					breakOut = true;
+					break;
+				}
+			if (breakOut)
+			{
+				this.isReceiving = false;
+				return false;
+			}
+
+		} while (!binding.receive());
+
+		this.isReceiving = false;
+		return true;
+	}
+
+	@Override
 	public void resetBindings()
 	{
 		for (int i = 0; i < this.bindings.length; i++)
@@ -304,7 +379,7 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		}
 
 		@Override
-		public synchronized Object getValue()
+		public Object getValue()
 		{
 			if (this.type == DirectionBinding.Type.KEY)
 			{
@@ -359,9 +434,47 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		}
 
 		@Override
-		public synchronized boolean receive()
+		public boolean receive()
 		{
-			// TODO Auto-generated method stub
+			{
+				ListIterator<MouseEvent> eventIterator = this.mouseEvents.listIterator();
+				while (eventIterator.hasNext())
+				{
+					MouseEvent event = eventIterator.next();
+
+					if (event.button != -1)
+						continue;
+
+					if (Math.abs(event.dx) + Math.abs(event.dy) + Math.abs(event.dz) <= Constants.FLT_EPSILON)
+						continue;
+
+					if (Math.abs(event.dx) > Math.abs(event.dy))
+					{
+						if (Math.abs(event.dx) > Math.abs(event.dz))
+							this.setBinding(DirectionBinding.Type.MOUSE_AXIS_X, (event.dx > 0 ? 1 : -1));
+						else
+							this.setBinding(DirectionBinding.Type.MOUSE_AXIS_Z, (event.dz > 0 ? 1 : -1));
+					}
+					else if (Math.abs(event.dy) > Math.abs(event.dz))
+						this.setBinding(DirectionBinding.Type.MOUSE_AXIS_Y, (event.dy > 0 ? 1 : -1));
+					else
+						this.setBinding(DirectionBinding.Type.MOUSE_AXIS_Z, (event.dz > 0 ? 1 : -1));
+
+					return true;
+				}
+			}
+
+			{
+				ListIterator<KeyboardEvent> eventIterator = this.keyboardEvents.listIterator();
+				while (eventIterator.hasNext())
+				{
+					KeyboardEvent event = eventIterator.next();
+
+					this.setBinding(DirectionBinding.Type.KEY, event.key);
+					return true;
+				}
+			}
+
 			return false;
 		}
 
@@ -371,7 +484,7 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 			this.setBinding(this.defaultType, this.defaultValue);
 		}
 
-		private synchronized void setBinding(DirectionBinding.Type type, int value)
+		private void setBinding(DirectionBinding.Type type, int value)
 		{
 			this.type = type;
 			if (type == DirectionBinding.Type.KEY)
@@ -459,7 +572,7 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		}
 
 		@Override
-		public synchronized boolean isActive()
+		public boolean isActive()
 		{
 			if (this.name == "Unbound")
 				return false;
@@ -497,9 +610,33 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		}
 
 		@Override
-		public synchronized boolean receive()
+		public boolean receive()
 		{
-			// TODO Auto-generated method stub
+			{
+				ListIterator<MouseEvent> eventIterator = this.mouseEvents.listIterator();
+				while (eventIterator.hasNext())
+				{
+					MouseEvent event = eventIterator.next();
+
+					if (event.button == -1)
+						continue;
+
+					this.setBinding(KeyBinding.Type.MOUSE, event.button);
+					return true;
+				}
+			}
+
+			{
+				ListIterator<KeyboardEvent> eventIterator = this.keyboardEvents.listIterator();
+				while (eventIterator.hasNext())
+				{
+					KeyboardEvent event = eventIterator.next();
+
+					this.setBinding(KeyBinding.Type.KEY, event.key);
+					return true;
+				}
+			}
+
 			return false;
 		}
 
@@ -509,7 +646,7 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 			this.setBinding(this.defaultType, this.defaultValue);
 		}
 
-		private synchronized void setBinding(KeyBinding.Type type, int value)
+		private void setBinding(KeyBinding.Type type, int value)
 		{
 			this.type = type;
 			if (type == KeyBinding.Type.KEY)
@@ -606,9 +743,9 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		public Object getValue() { return this.child.getValue(); }
 
 		@Override
-		public boolean receive() { return true; }
+		public boolean receive() { return this.child.receive(); }
 
 		@Override
-		public void reset() { }
+		public void reset() { this.child.reset(); }
 	}
 }

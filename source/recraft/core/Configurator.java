@@ -26,8 +26,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import recraft.core.Creatable.CreatableException;
+import recraft.core.InputDevice.InputBinding;
 import recraft.networkinterface.UDPNetworkInterface;
 import recraft.networknode.MinecraftServer;
+
+// TODO Make use of the Map interface to abstract map implementation.  Same goes for List.
 
 public class Configurator
 {
@@ -38,17 +41,17 @@ public class Configurator
 		try
 		{
 			ConfiguratorSelect select = null;
-			
+
 			select = Configurator.addSelect("Options.Input.Main Input Device");
-			
+
 			select = Configurator.addSelect("Options.Network.Network Interface");
 			select.addItem(new ConfiguratorCreatable("UDP-Based Interface", UDPNetworkInterface.class));
 
 			select = Configurator.addSelect("Options.Network.Network Nodes.Client.Node Type");
 			//select.addItem(new ConfiguratorCreatable("Minecraft Client", MinecraftClient.class));
-			
-			select = Configurator.addSelect("Options.Network.Network Nodes.Client.Input Device");
-			
+
+			Configurator.addLink("Options.Input.Main Input Device", "Options.Network.Network Nodes.Client.Input Device");
+
 
 			select = Configurator.addSelect("Options.Network.Network Nodes.Server.Node Type");
 			select.addItem(new ConfiguratorCreatable("Minecraft Server", MinecraftServer.class));
@@ -79,16 +82,22 @@ public class Configurator
 		ConfiguratorFloatRange floatRange = new ConfiguratorFloatRange(getNameFromPath(path), rangeLow, rangeHigh, defaultValue);
 		return (ConfiguratorFloatRange)addObject(path, floatRange);
 	}
-	
+
 	public static boolean addLink(String source, String destination)
 	{
 		Object object = get(source);
 		if (object == null)
 			return false;
-		
+
 		if (addObject(destination, object) == null)
 			return false;
 		return true;
+	}
+
+	public static ConfiguratorInputDevice addInputDevice(String containingPath, ConfiguratorInputDevice inputDevice)
+	{
+		String fullPath = containingPath + "." + inputDevice.getName();
+		return (ConfiguratorInputDevice)addObject(fullPath, inputDevice);
 	}
 
 	public static Object get(String path)
@@ -135,17 +144,17 @@ public class Configurator
 		}
 		return currentGroup;
 	}
-	
+
 	private static String getNameFromPath(String path)
 	{
 		// Delimit around "."
 		String[] splitPath = path.split("\\.");
 		if (splitPath.length == 0)
 			return "";
-		
+
 		return splitPath[splitPath.length - 1];
 	}
-	
+
 	private static Object addObject(String path, Object newObject)
 	{
 		ConfiguratorGroup containingGroup = getContainingGroup(path);
@@ -183,7 +192,7 @@ public class Configurator
 		@Override
 		public String toString()
 		{
-			return this.name;
+			return this.name; // TODO Wrap all name returns in new Strings
 		}
 	}
 
@@ -353,6 +362,67 @@ public class Configurator
 				return this.defaultValue;
 
 			return this.currentValue;
+		}
+	}
+
+	public static class ConfiguratorInputDevice extends ConfiguratorGroup
+	{
+		private InputDevice inputDevice;
+
+		public ConfiguratorInputDevice(InputDevice inputDevice)
+		{
+			super(inputDevice.getName(), new HashMap<String, Object>());
+
+			this.inputDevice = inputDevice;
+		}
+
+		public InputDevice getInputDevice()
+		{
+			return this.inputDevice;
+		}
+
+		public void addBinding(String name, InputBinding inputBinding)
+		{
+			this.items.put(name, new ConfiguratorInputBinding(this.inputDevice, inputBinding));
+		}
+
+		public ConfiguratorInputBinding getBinding(String name)
+		{
+			return (ConfiguratorInputBinding)this.items.get(name);
+		}
+
+		public String getName()
+		{
+			return this.inputDevice.getName();
+		}
+
+		@Override
+		public String toString()
+		{
+			return this.getName();
+		}
+
+		public static class ConfiguratorInputBinding
+		{
+			private InputDevice inputDevice;
+			private InputBinding inputBinding;
+
+			public ConfiguratorInputBinding(InputDevice inputDevice, InputBinding inputBinding)
+			{
+				this.inputDevice = inputDevice;
+				this.inputBinding = inputBinding;
+			}
+
+			public boolean receive()
+			{
+				return this.inputDevice.receiveBinding(this.inputBinding);
+			}
+
+			@Override
+			public String toString()
+			{
+				return this.inputBinding.getBindingString();
+			}
 		}
 	}
 

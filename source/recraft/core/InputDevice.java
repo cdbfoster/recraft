@@ -30,6 +30,8 @@ public interface InputDevice extends Creatable
 
 	Input getInputState();
 
+	boolean receiveBinding(InputBinding binding);
+
 	void resetBindings();
 
 	public static interface InputBinding
