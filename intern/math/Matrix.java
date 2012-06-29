@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class Matrix implements Serializable
 {
 	private static final long serialVersionUID = -8921412792080681557L;
-	
+
 	public float[][] m;
 
 	private void setIdentity()
@@ -40,6 +40,11 @@ public class Matrix implements Serializable
 		this.m[1][0] = _10; this.m[1][1] = _11; this.m[1][2] = _12; this.m[1][3] = _13;
 		this.m[2][0] = _20; this.m[2][1] = _21; this.m[2][2] = _22; this.m[2][3] = _23;
 		this.m[3][0] = _30; this.m[3][1] = _31; this.m[3][2] = _32; this.m[3][3] = _33;
+	}
+
+	public Matrix(Matrix b)
+	{
+		this.m = b.clone().m;
 	}
 
 	public Matrix transpose()
