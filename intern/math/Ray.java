@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class Ray implements Serializable
 {
 	private static final long serialVersionUID = -7060239033050818584L;
-	
+
 	public Vector origin;
 	public Vector direction;
 	public float minTime, maxTime;
@@ -38,6 +38,14 @@ public class Ray implements Serializable
 		this.direction = direction.normalized();
 		this.minTime = minTime;
 		this.maxTime = maxTime;
+	}
+
+	public Ray(Ray b)
+	{
+		this.origin = new Vector(b.origin);
+		this.direction = new Vector(b.direction);
+		this.minTime = b.minTime;
+		this.maxTime = b.maxTime;
 	}
 
 	public Vector at(float time)
@@ -98,7 +106,7 @@ public class Ray implements Serializable
 	@Override
 	public Ray clone()
 	{
-		return new Ray(this.origin.clone(), this.direction.clone(), this.minTime, this.maxTime);
+		return new Ray(this);
 	}
 
 	@Override

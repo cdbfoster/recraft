@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class IntVector implements Serializable
 {
 	private static final long serialVersionUID = 89026289229637378L;
-	
+
 	public int x;
 	public int y;
 	public int z;
@@ -124,6 +124,12 @@ public class IntVector implements Serializable
 		hash = 17 * hash + this.z;
 
 		return hash;
+	}
+
+	@Override
+	public IntVector clone()
+	{
+		return new IntVector(this);
 	}
 
 	@Override
