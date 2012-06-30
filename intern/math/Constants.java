@@ -10,6 +10,7 @@ package math;
 
 public class Constants
 {
+	public static float PI = (float)Math.PI;
 	public static float FLT_EPSILON;
 
 	static
