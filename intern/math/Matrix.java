@@ -44,7 +44,10 @@ public class Matrix implements Serializable
 
 	public Matrix(Matrix b)
 	{
-		this.m = b.clone().m;
+		this.m = b.m.clone();
+
+		for (int row = 0; row < b.m.length; row++)
+			this.m[row] = b.m[row].clone();
 	}
 
 	public Matrix transpose()
@@ -257,14 +260,7 @@ public class Matrix implements Serializable
 	@Override
 	public Matrix clone()
 	{
-		Matrix cloned = new Matrix();
-
-		cloned.m = this.m.clone();
-
-		for (int row = 0; row < this.m.length; row++)
-			cloned.m[row] = this.m[row].clone();
-
-		return cloned;
+		return new Matrix(this);
 	}
 
 	@Override
