@@ -176,7 +176,21 @@ public class Matrix implements Serializable
 
 	public Ray multiply(Ray b)
 	{
-		return new Ray(this.multiply(b.origin), this.as3x3().multiply(b.direction), b.minTime, b.maxTime);
+		float maxTime = b.maxTime;
+		if (maxTime < Float.POSITIVE_INFINITY)
+		{
+			Vector range = b.at(maxTime).subtract(b.origin);
+			maxTime = this.as3x3().multiply(range).length();
+		}
+
+		float minTime = b.minTime;
+		if (minTime < Float.POSITIVE_INFINITY)
+		{
+			Vector range = b.at(minTime).subtract(b.origin);
+			minTime = this.as3x3().multiply(range).length();
+		}
+
+		return new Ray(this.multiply(b.origin), this.as3x3().multiply(b.direction), minTime, maxTime);
 	}
 
 	public Vector multiply(Vector b)
@@ -191,21 +205,21 @@ public class Matrix implements Serializable
 		Matrix xRotation = new Matrix();
 		if (Math.abs(radiansX) > Constants.FLT_EPSILON)
 			xRotation = new Matrix(1.0f, 0.0f, 0.0f, 0.0f,
-								   0.0f, (float)Math.cos(radiansX), -(float)Math.sin(radiansX), 0.0f,
-								   0.0f, (float)Math.sin(radiansX), (float)Math.cos(radiansX), 0.0f,
+								   0.0f, (float)Math.cos(radiansX), (float)Math.sin(radiansX), 0.0f,
+								   0.0f, -(float)Math.sin(radiansX), (float)Math.cos(radiansX), 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix yRotation = new Matrix();
 		if (Math.abs(radiansY) > Constants.FLT_EPSILON)
-			yRotation = new Matrix((float)Math.cos(radiansY), 0.0f, (float)Math.sin(radiansY), 0.0f,
+			yRotation = new Matrix((float)Math.cos(radiansY), 0.0f, -(float)Math.sin(radiansY), 0.0f,
 								   0.0f, 1.0f, 0.0f, 0.0f,
-								   -(float)Math.sin(radiansY), 0.0f, (float)Math.cos(radiansY), 0.0f,
+								   (float)Math.sin(radiansY), 0.0f, (float)Math.cos(radiansY), 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix zRotation = new Matrix();
 		if (Math.abs(radiansZ) > Constants.FLT_EPSILON)
-			zRotation = new Matrix((float)Math.cos(radiansZ), -(float)Math.sin(radiansZ), 0.0f, 0.0f,
-								   (float)Math.sin(radiansZ), (float)Math.cos(radiansZ), 0.0f, 0.0f,
+			zRotation = new Matrix((float)Math.cos(radiansZ), (float)Math.sin(radiansZ), 0.0f, 0.0f,
+								   -(float)Math.sin(radiansZ), (float)Math.cos(radiansZ), 0.0f, 0.0f,
 								   0.0f, 0.0f, 1.0f, 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
