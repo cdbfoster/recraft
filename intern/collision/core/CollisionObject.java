@@ -65,9 +65,9 @@ public class CollisionObject implements Serializable
 		this.transformInverse = this.transform.inverted();
 	}
 
-	public float castRay(final Ray ray, CollisionPoint hitpoint)
+	public float castRay(final Ray ray, CollisionPoint hitPoint)
 	{
-		return this.shape.castRay(this.transform, this.transformInverse, ray, hitpoint);
+		return this.shape.castRay(this.transform, this.transformInverse, ray, hitPoint);
 	}
 
 	public CollisionShape getShape()
