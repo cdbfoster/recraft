@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import recraft.core.Creatable.CreatableException;
 import recraft.core.InputDevice.InputBinding;
 import recraft.networkinterface.UDPNetworkInterface;
 import recraft.networknode.MinecraftServer;
@@ -248,13 +247,10 @@ public class Configurator
 	public static class ConfiguratorCreatable
 	{
 		private String name;
-		private Class<?> creatable;
+		private Class<? extends Creatable> creatable;
 
-		public ConfiguratorCreatable(String name, Class<?> creatable) throws CreatableException
+		public ConfiguratorCreatable(String name, Class<? extends Creatable> creatable)
 		{
-			if (!Creatable.class.isAssignableFrom(creatable))
-				throw new CreatableException("Class does not implement the Creatable interface");
-
 			this.name = name;
 			this.creatable = creatable;
 		}
