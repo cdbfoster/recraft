@@ -61,6 +61,20 @@ public class Vector implements Serializable
 			this.z = value;
 	}
 
+	public void set(float x, float y, float z)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public void set(Vector b)
+	{
+		this.x = b.x;
+		this.y = b.y;
+		this.z = b.z;
+	}
+
 	public Vector add(Vector b)
 	{
 		return new Vector(this.x + b.x, this.y + b.y, this.z + b.z);
