@@ -124,19 +124,76 @@ public class Matrix implements Serializable
 		return result;
 	}
 
+	public Matrix normalize()
+	{
+		Vector x = this.xAxis().normalized();
+		Vector y = this.yAxis().normalized();
+		Vector z = this.zAxis().normalized();
+
+		this.m[0][0] = x.x; this.m[0][1] = y.x; this.m[0][2] = z.x;
+		this.m[1][0] = x.y; this.m[1][1] = y.y; this.m[1][2] = z.y;
+		this.m[2][0] = x.z; this.m[2][1] = z.y; this.m[2][2] = z.z;
+
+		return this;
+	}
+
+	public Matrix normalized()
+	{
+		Vector x = this.xAxis().normalized();
+		Vector y = this.yAxis().normalized();
+		Vector z = this.zAxis().normalized();
+
+		return new Matrix(x.x, y.x, z.x, this.m[0][3],
+						  x.y, y.y, z.y, this.m[1][3],
+						  x.z, y.z, z.z, this.m[2][3],
+						  this.m[3][0], this.m[3][1], this.m[3][2], this.m[3][3]);
+	}
+
 	public Vector xAxis()
 	{
-		return new Vector(this.m[0][0], this.m[0][1], this.m[0][2]);
+		return new Vector(this.m[0][0], this.m[1][0], this.m[2][0]);
 	}
 
 	public Vector yAxis()
 	{
-		return new Vector(this.m[1][0], this.m[1][1], this.m[1][2]);
+		return new Vector(this.m[0][1], this.m[1][1], this.m[2][1]);
 	}
 
 	public Vector zAxis()
 	{
-		return new Vector(this.m[2][0], this.m[2][1], this.m[2][2]);
+		return new Vector(this.m[0][2], this.m[1][2], this.m[2][2]);
+	}
+
+	public void setAxis(int axis, Vector value)
+	{
+		if (axis < 0 || axis >= 3)
+			return;
+		for (int i = 0; i < 3; i++)
+			this.m[axis][i] = value.get(i);
+	}
+
+	public Matrix rotationPart()
+	{
+		Matrix normalizedMatrix = this.normalized().as3x3();
+		if (normalizedMatrix.isNegative())
+		{
+			normalizedMatrix.setAxis(0, normalizedMatrix.xAxis().multiply(-1.0f));
+			normalizedMatrix.setAxis(1, normalizedMatrix.yAxis().multiply(-1.0f));
+			normalizedMatrix.setAxis(2, normalizedMatrix.zAxis().multiply(-1.0f));
+		}
+
+		return normalizedMatrix;
+	}
+
+	public Vector scalePart()
+	{
+		Matrix scaleMatrix = this.as3x3().multiply(this.rotationPart().inverted());
+		return new Vector(scaleMatrix.m[0][0], scaleMatrix.m[1][1], scaleMatrix.m[2][2]);
+	}
+
+	public Vector translationPart()
+	{
+		return new Vector(this.m[0][3], this.m[1][3], this.m[2][3]);
 	}
 
 	public Matrix as3x3()
@@ -205,21 +262,21 @@ public class Matrix implements Serializable
 		Matrix xRotation = new Matrix();
 		if (Math.abs(radiansX) > Constants.FLT_EPSILON)
 			xRotation = new Matrix(1.0f, 0.0f, 0.0f, 0.0f,
-								   0.0f, (float)Math.cos(radiansX), (float)Math.sin(radiansX), 0.0f,
-								   0.0f, -(float)Math.sin(radiansX), (float)Math.cos(radiansX), 0.0f,
+								   0.0f, (float)Math.cos(radiansX), -(float)Math.sin(radiansX), 0.0f,
+								   0.0f, (float)Math.sin(radiansX), (float)Math.cos(radiansX), 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix yRotation = new Matrix();
 		if (Math.abs(radiansY) > Constants.FLT_EPSILON)
-			yRotation = new Matrix((float)Math.cos(radiansY), 0.0f, -(float)Math.sin(radiansY), 0.0f,
+			yRotation = new Matrix((float)Math.cos(radiansY), 0.0f, (float)Math.sin(radiansY), 0.0f,
 								   0.0f, 1.0f, 0.0f, 0.0f,
-								   (float)Math.sin(radiansY), 0.0f, (float)Math.cos(radiansY), 0.0f,
+								   -(float)Math.sin(radiansY), 0.0f, (float)Math.cos(radiansY), 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
 		Matrix zRotation = new Matrix();
 		if (Math.abs(radiansZ) > Constants.FLT_EPSILON)
-			zRotation = new Matrix((float)Math.cos(radiansZ), (float)Math.sin(radiansZ), 0.0f, 0.0f,
-								   -(float)Math.sin(radiansZ), (float)Math.cos(radiansZ), 0.0f, 0.0f,
+			zRotation = new Matrix((float)Math.cos(radiansZ), -(float)Math.sin(radiansZ), 0.0f, 0.0f,
+								   (float)Math.sin(radiansZ), (float)Math.cos(radiansZ), 0.0f, 0.0f,
 								   0.0f, 0.0f, 1.0f, 0.0f,
 								   0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -240,6 +297,12 @@ public class Matrix implements Serializable
 						  0.0f, 1.0f, 0.0f, translationY,
 						  0.0f, 0.0f, 1.0f, translationZ,
 						  0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
+	private boolean isNegative()
+	{
+		Vector z = this.xAxis().cross(this.yAxis());
+		return z.dot(this.zAxis()) < 0.0f;
 	}
 
 	@Override
