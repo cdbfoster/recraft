@@ -20,7 +20,6 @@ public class CollisionObject implements Serializable
 	protected CollisionShape shape;
 
 	protected Matrix transform;
-	protected Matrix transformInverse;
 
 	protected Vector linearVelocity;
 	protected Vector angularVelocity;
@@ -30,7 +29,6 @@ public class CollisionObject implements Serializable
 		this.shape = shape;
 
 		this.transform = new Matrix();
-		this.transformInverse = new Matrix();
 
 		this.linearVelocity = new Vector();
 		this.angularVelocity = new Vector();
@@ -40,28 +38,29 @@ public class CollisionObject implements Serializable
 	{
 		this(shape);
 		this.transform = transform;
-		this.transformInverse = transform.inverted();
 	}
 
 	public void rotate(float radiansX, float radiansY, float radiansZ)
 	{
 		Matrix matrix = Matrix.rotate(radiansX, radiansY, radiansZ);
 		this.transform = matrix.multiply(this.transform);
-		this.transformInverse = this.transform.inverted();
 	}
 
 	public void scale(float scaleX, float scaleY, float scaleZ)
 	{
 		Matrix matrix = Matrix.scale(scaleX, scaleY, scaleZ);
 		this.transform = matrix.multiply(this.transform);
-		this.transformInverse = this.transform.inverted();
 	}
 
 	public void translate(float translationX, float translationY, float translationZ)
 	{
 		Matrix matrix = Matrix.translate(translationX, translationY, translationZ);
 		this.transform = matrix.multiply(this.transform);
-		this.transformInverse = this.transform.inverted();
+	}
+
+	public Matrix getTransform()
+	{
+		return new Matrix(this.transform);
 	}
 
 	public CollisionShape getShape()
