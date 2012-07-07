@@ -16,6 +16,8 @@ import collision.core.CollisionShape;
 
 public abstract class ConvexPolyhedronCollisionShape implements CollisionShape
 {
+	private static final long serialVersionUID = -5063244428973689839L;
+
 	@Override
 	public abstract void getAABB(final Matrix frame, Vector aabbMin, Vector aabbMax);
 
