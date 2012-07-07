@@ -12,40 +12,40 @@ import math.Matrix;
 import math.Ray;
 import math.Vector;
 import collision.core.CollisionPoint;
-import collision.core.CollisionShape;
 
-public class AABBCollisionShape implements CollisionShape
+public class AABBCollisionShape implements ConvexPolyhedronCollisionShape
 {
 	private static final long serialVersionUID = 6776087204294921398L;
 
 	public final Vector aabbMin, aabbMax;
 
+	private Matrix cachedFrame, cachedFrameNoRotation, cachedFrameNoRotationInverse;
+
 	public AABBCollisionShape(Vector aabbMin, Vector aabbMax)
 	{
 		this.aabbMin = aabbMin;
 		this.aabbMax = aabbMax;
+
+		this.cachedFrame = new Matrix();
+		this.cachedFrameNoRotation = new Matrix();
+		this.cachedFrameNoRotationInverse = new Matrix();
 	}
 
 	@Override
 	public void getAABB(final Matrix frame, Vector aabbMin, Vector aabbMax)
 	{
-		Matrix frameNoRotation = frame.multiply(frame.rotationPart().inverted());
-		aabbMin.set(frameNoRotation.multiply(this.aabbMin));
-		aabbMax.set(frameNoRotation.multiply(this.aabbMax));
+		this.cacheFrameMatrix(frame);
+
+		aabbMin.set(this.cachedFrameNoRotation.multiply(this.aabbMin));
+		aabbMax.set(this.cachedFrameNoRotation.multiply(this.aabbMax));
 	}
 
 	@Override
 	public float castRay(final Matrix frame, final Ray ray, CollisionPoint hitPoint)
 	{
-		Matrix frameNoRotation = frame.multiply(frame.rotationPart().inverted());
-		Matrix frameNoRotationInverse = frameNoRotation.inverted();
+		this.cacheFrameMatrix(frame);
 
-		System.out.println(frameNoRotation);
-		System.out.println(frameNoRotationInverse);
-
-		Ray r = frameNoRotationInverse.multiply(ray);
-
-		System.out.println(r);
+		Ray r = this.cachedFrameNoRotationInverse.multiply(ray);
 
 		// Negative x face
 		if (r.direction.x > 0.0f)
@@ -59,10 +59,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(-1.0f, 0.0f, 0.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(-1.0f, 0.0f, 0.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -78,10 +78,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(0.0f, -1.0f, 0.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(0.0f, -1.0f, 0.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -97,10 +97,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(0.0f, 0.0f, -1.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(0.0f, 0.0f, -1.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -116,10 +116,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(1.0f, 0.0f, 0.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(1.0f, 0.0f, 0.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -135,10 +135,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(0.0f, 1.0f, 0.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(0.0f, 1.0f, 0.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -154,10 +154,10 @@ public class AABBCollisionShape implements CollisionShape
 					{
 						hitPoint.localPointA = new Vector(point);
 						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = frameNoRotation.multiply(point);
+						hitPoint.worldPointA = this.cachedFrameNoRotation.multiply(point);
 						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = frameNoRotation.as3x3().multiply(new Vector(0.0f, 0.0f, 1.0f));
-						return frameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
+						hitPoint.worldNormalB = this.cachedFrameNoRotation.as3x3().multiply(new Vector(0.0f, 0.0f, 1.0f));
+						return this.cachedFrameNoRotation.as3x3().multiply(point.subtract(r.origin)).length();
 					}
 		}
 
@@ -170,8 +170,90 @@ public class AABBCollisionShape implements CollisionShape
 	}
 
 	@Override
+	public float getGreatestVertexAlongAxis(Matrix frame, Vector axis)
+	{
+		this.cacheFrameMatrix(frame);
+
+		Vector transformedAxis = this.cachedFrameNoRotationInverse.as3x3().multiply(axis);
+
+		float[] projections = new float[] {
+			transformedAxis.dot(this.aabbMax),
+			transformedAxis.dot(new Vector(this.aabbMax.x, this.aabbMax.y, this.aabbMin.z)),
+			transformedAxis.dot(new Vector(this.aabbMax.x, this.aabbMin.y, this.aabbMax.z)),
+			transformedAxis.dot(new Vector(this.aabbMax.x, this.aabbMin.y, this.aabbMin.z)),
+			transformedAxis.dot(new Vector(this.aabbMin.x, this.aabbMax.y, this.aabbMax.z)),
+			transformedAxis.dot(new Vector(this.aabbMin.x, this.aabbMax.y, this.aabbMin.z)),
+			transformedAxis.dot(new Vector(this.aabbMin.x, this.aabbMin.y, this.aabbMax.z)),
+			transformedAxis.dot(this.aabbMin)
+		};
+
+		float greatest = Float.NEGATIVE_INFINITY;
+		for (int i = 0; i < projections.length; i++)
+			if (projections[i] > greatest)
+				greatest = projections[i];
+
+		return this.cachedFrameNoRotation.as3x3().multiply(transformedAxis.multiply(greatest)).length();
+	}
+
+	@Override
+	public int getEdgeCount()
+	{
+		return 12;
+	}
+
+	@Override
+	public Vector getEdge(Matrix frame, int index)
+	{
+		if (index >= 0 && index <=3)
+			return new Vector(1.0f, 0.0f, 0.0f);
+		else if (index >= 4 && index <= 7)
+			return new Vector(0.0f, 1.0f, 0.0f);
+		else if (index >= 8 && index <=11)
+			return new Vector(0.0f, 0.0f, 1.0f);
+
+		return null;
+	}
+
+	@Override
+	public int getFaceCount()
+	{
+		return 6;
+	}
+
+	@Override
+	public Vector getFaceNormal(Matrix frame, int index)
+	{
+		switch (index)
+		{
+		case 0:
+			return new Vector(1.0f, 0.0f, 0.0f);
+		case 1:
+			return new Vector(0.0f, 1.0f, 0.0f);
+		case 2:
+			return new Vector(0.0f, 0.0f, 1.0f);
+		case 3:
+			return new Vector(-1.0f, 0.0f, 0.0f);
+		case 4:
+			return new Vector(0.0f, -1.0f, 0.0f);
+		case 5:
+			return new Vector(0.0f, 0.0f, -1.0f);
+		}
+		return null;
+	}
+
+	@Override
 	public String getTypeName()
 	{
 		return "Axis-Aligned Bounding Box";
+	}
+
+	private void cacheFrameMatrix(Matrix frame)
+	{
+		if (this.cachedFrame.equals(frame))
+			return;
+
+		this.cachedFrame = new Matrix(frame);
+		this.cachedFrameNoRotation = frame.multiply(frame.rotationPart().inverted());
+		this.cachedFrameNoRotationInverse = this.cachedFrameNoRotation.inverted();
 	}
 }
