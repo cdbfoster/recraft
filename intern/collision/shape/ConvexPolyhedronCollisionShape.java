@@ -14,23 +14,23 @@ import math.Vector;
 import collision.core.CollisionPoint;
 import collision.core.CollisionShape;
 
-public interface ConvexPolyhedronCollisionShape extends CollisionShape
+public abstract class ConvexPolyhedronCollisionShape implements CollisionShape
 {
 	@Override
-	void getAABB(final Matrix frame, Vector aabbMin, Vector aabbMax);
+	public abstract void getAABB(final Matrix frame, Vector aabbMin, Vector aabbMax);
 
 	@Override
-	float castRay(final Matrix frame, final Ray ray, CollisionPoint hitPoint);
+	public abstract float castRay(final Matrix frame, final Ray ray, CollisionPoint hitPoint);
 
 	/** Projects all vertices of this shape onto axis and returns the largest value.  All calculations are done with respect to frame. */
-	float getGreatestVertexAlongAxis(Matrix frame, Vector axis);
+	public abstract float getGreatestVertexAlongAxis(Matrix frame, Vector axis);
 
-	int getEdgeCount();
-	Vector getEdge(Matrix frame, int index);
+	public abstract int getEdgeCount();
+	public abstract Vector getEdge(Matrix frame, int index);
 
-	int getFaceCount();
-	Vector getFaceNormal(Matrix frame, int index);
+	public abstract int getFaceCount();
+	public abstract Vector getFaceNormal(Matrix frame, int index);
 
 	@Override
-	String getTypeName();
+	public abstract String getTypeName();
 }

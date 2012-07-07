@@ -13,7 +13,7 @@ import math.Ray;
 import math.Vector;
 import collision.core.CollisionPoint;
 
-public class AABBCollisionShape implements ConvexPolyhedronCollisionShape
+public class AABBCollisionShape extends ConvexPolyhedronCollisionShape
 {
 	private static final long serialVersionUID = 6776087204294921398L;
 
