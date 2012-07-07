@@ -11,7 +11,6 @@ package collision.core;
 import java.io.Serializable;
 
 import math.Matrix;
-import math.Ray;
 import math.Vector;
 
 public class CollisionObject implements Serializable
@@ -63,11 +62,6 @@ public class CollisionObject implements Serializable
 		Matrix matrix = Matrix.translate(translationX, translationY, translationZ);
 		this.transform = matrix.multiply(this.transform);
 		this.transformInverse = this.transform.inverted();
-	}
-
-	public float castRay(final Ray ray, CollisionPoint hitPoint)
-	{
-		return this.shape.castRay(this.transform, ray, hitPoint);
 	}
 
 	public CollisionShape getShape()
