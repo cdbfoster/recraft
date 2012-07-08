@@ -163,9 +163,14 @@ public class Vector implements Serializable
 
 	public boolean isZero()
 	{
-		if (Math.abs(this.x) < Constants.FLT_EPSILON)
-			if (Math.abs(this.y) < Constants.FLT_EPSILON)
-				if (Math.abs(this.z) < Constants.FLT_EPSILON)
+		return this.isZero(Constants.FLT_EPSILON);
+	}
+
+	public boolean isZero(float tolerance)
+	{
+		if (Math.abs(this.x) < tolerance)
+			if (Math.abs(this.y) < tolerance)
+				if (Math.abs(this.z) < tolerance)
 					return true;
 		return false;
 	}
