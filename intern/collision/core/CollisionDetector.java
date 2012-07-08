@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import collision.algorithm.ConvexPolyhedronConvexPolyhedronCollisionAlgorithm;
 import collision.core.CollisionAlgorithm.CollisionAlgorithmDescriptor;
 
 public class CollisionDetector
@@ -20,6 +21,23 @@ public class CollisionDetector
 	private static Map<CollisionAlgorithmDescriptor, CollisionAlgorithm> algorithms = new HashMap<CollisionAlgorithmDescriptor, CollisionAlgorithm>();
 
 	public static CollisionResult detectCollision(CollisionObject a, CollisionObject b)
+	{
+		CollisionAlgorithm algorithm = findSuitableAlgorithm(a, b);
+
+		System.out.println(algorithm);
+
+		if (algorithm == null)
+			return null;
+
+		return algorithm.detectCollision(a, b);
+	}
+
+	public static void registerAlgorithm(CollisionAlgorithm algorithm)
+	{
+		algorithms.put(algorithm.getDescriptor(), algorithm);
+	}
+
+	private static CollisionAlgorithm findSuitableAlgorithm(CollisionObject a, CollisionObject b)
 	{
 		// Look for an exact match first
 		CollisionAlgorithmDescriptor algorithmDescriptor = new CollisionAlgorithmDescriptor(a.getShape().getClass(), b.getShape().getClass());
@@ -40,18 +58,13 @@ public class CollisionDetector
 					break;
 				}
 			}
-
-			if (algorithm == null)
-				return null;
 		}
 
-		System.out.println(algorithm);
-
-		return algorithm.detectCollision(a, b);
+		return algorithm;
 	}
 
-	public static void registerAlgorithm(CollisionAlgorithm algorithm)
+	static
 	{
-		algorithms.put(algorithm.getDescriptor(), algorithm);
+		registerAlgorithm(new ConvexPolyhedronConvexPolyhedronCollisionAlgorithm());
 	}
 }

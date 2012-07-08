@@ -24,8 +24,12 @@ public abstract class ConvexPolyhedronCollisionShape implements CollisionShape
 	@Override
 	public abstract float castRay(final Matrix frame, final Ray ray, CollisionPoint hitPoint);
 
-	/** Projects all vertices of this shape onto axis and returns the largest value.  All calculations are done with respect to frame. */
-	public abstract float getGreatestVertexAlongAxis(Matrix frame, Vector axis);
+	/** Projects all vertices of this shape onto axis and returns the largest value.  The point at the largest value is returned in point.
+	 * All calculations are done with respect to frame. */
+	public abstract float getGreatestPointAlongAxis(final Matrix frame, final Vector axis, Vector point);
+
+	/** Transforms the world space coordinate, point, in the local space of this shape as determined by frame. */
+	public abstract Vector getLocalPoint(Matrix frame, Vector point);
 
 	public abstract int getEdgeCount();
 	public abstract Vector getEdge(Matrix frame, int index);
