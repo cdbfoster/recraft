@@ -291,12 +291,22 @@ public class Matrix implements Serializable
 						  0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
+	public static Matrix scale(Vector scaleXYZ)
+	{
+		return scale(scaleXYZ.x, scaleXYZ.y, scaleXYZ.z);
+	}
+
 	public static Matrix translate(float translationX, float translationY, float translationZ)
 	{
 		return new Matrix(1.0f, 0.0f, 0.0f, translationX,
 						  0.0f, 1.0f, 0.0f, translationY,
 						  0.0f, 0.0f, 1.0f, translationZ,
 						  0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
+	public static Matrix translate(Vector translationXYZ)
+	{
+		return translate(translationXYZ.x, translationXYZ.y, translationXYZ.z);
 	}
 
 	private boolean isNegative()
