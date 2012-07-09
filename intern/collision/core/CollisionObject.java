@@ -37,7 +37,7 @@ public class CollisionObject implements Serializable
 	public CollisionObject(CollisionShape shape, Matrix transform)
 	{
 		this(shape);
-		this.transform = transform;
+		this.transform = new Matrix(transform);
 	}
 
 	public synchronized void rotate(float radiansX, float radiansY, float radiansZ)
@@ -56,6 +56,11 @@ public class CollisionObject implements Serializable
 	{
 		Matrix matrix = Matrix.translate(translationX, translationY, translationZ);
 		this.transform = matrix.multiply(this.transform);
+	}
+
+	public synchronized void setTransform(Matrix transform)
+	{
+		this.transform = new Matrix(transform);
 	}
 
 	public synchronized Matrix getTransform()
