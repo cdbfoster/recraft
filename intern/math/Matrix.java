@@ -10,6 +10,7 @@ package math;
 
 import java.io.Serializable;
 
+// Many of the methods in this class were written using techniques found in Blender's source code (http://www.blender.org).
 public class Matrix implements Serializable
 {
 	private static final long serialVersionUID = -8921412792080681557L;
@@ -143,25 +144,25 @@ public class Matrix implements Serializable
 		Vector y = this.yAxis().normalized();
 		Vector z = this.zAxis().normalized();
 
-		return new Matrix(x.x, y.x, z.x, this.m[0][3],
-						  x.y, y.y, z.y, this.m[1][3],
-						  x.z, y.z, z.z, this.m[2][3],
+		return new Matrix(x.x, x.y, x.z, this.m[0][3],
+						  y.x, y.y, y.z, this.m[1][3],
+						  z.x, z.y, z.z, this.m[2][3],
 						  this.m[3][0], this.m[3][1], this.m[3][2], this.m[3][3]);
 	}
 
 	public Vector xAxis()
 	{
-		return new Vector(this.m[0][0], this.m[1][0], this.m[2][0]);
+		return new Vector(this.m[0][0], this.m[0][1], this.m[0][2]);
 	}
 
 	public Vector yAxis()
 	{
-		return new Vector(this.m[0][1], this.m[1][1], this.m[2][1]);
+		return new Vector(this.m[1][0], this.m[1][1], this.m[1][2]);
 	}
 
 	public Vector zAxis()
 	{
-		return new Vector(this.m[0][2], this.m[1][2], this.m[2][2]);
+		return new Vector(this.m[2][0], this.m[2][1], this.m[2][2]);
 	}
 
 	public void setAxis(int axis, Vector value)
