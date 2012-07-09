@@ -40,25 +40,25 @@ public class CollisionObject implements Serializable
 		this.transform = transform;
 	}
 
-	public void rotate(float radiansX, float radiansY, float radiansZ)
+	public synchronized void rotate(float radiansX, float radiansY, float radiansZ)
 	{
 		Matrix matrix = Matrix.rotate(radiansX, radiansY, radiansZ);
 		this.transform = matrix.multiply(this.transform);
 	}
 
-	public void scale(float scaleX, float scaleY, float scaleZ)
+	public synchronized void scale(float scaleX, float scaleY, float scaleZ)
 	{
 		Matrix matrix = Matrix.scale(scaleX, scaleY, scaleZ);
 		this.transform = matrix.multiply(this.transform);
 	}
 
-	public void translate(float translationX, float translationY, float translationZ)
+	public synchronized void translate(float translationX, float translationY, float translationZ)
 	{
 		Matrix matrix = Matrix.translate(translationX, translationY, translationZ);
 		this.transform = matrix.multiply(this.transform);
 	}
 
-	public Matrix getTransform()
+	public synchronized Matrix getTransform()
 	{
 		return new Matrix(this.transform);
 	}

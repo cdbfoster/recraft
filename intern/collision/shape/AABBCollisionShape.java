@@ -27,10 +27,13 @@ public class AABBCollisionShape extends BoxCollisionShape
 	@Override
 	public void getAABB(final Matrix frame, Vector aabbMin, Vector aabbMax)
 	{
-		this.cacheFrameMatrix(frame);
+		synchronized (this.cacheLock)
+		{
+			this.cacheFrameMatrix(frame);
 
-		aabbMin.set(this.cachedFrame.multiply(this.minPoint));
-		aabbMax.set(this.cachedFrame.multiply(this.maxPoint));
+			aabbMin.set(this.cachedFrame.multiply(this.minPoint));
+			aabbMax.set(this.cachedFrame.multiply(this.maxPoint));
+		}
 	}
 
 	@Override
@@ -76,7 +79,6 @@ public class AABBCollisionShape extends BoxCollisionShape
 	@Override
 	protected void cacheFrameMatrix(Matrix frame)
 	{
-		System.out.println("AABBCollisionShape.cacheFrameMatrix");
 		if (this.cachedSeedFrame.equals(frame))
 			return;
 

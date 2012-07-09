@@ -24,20 +24,18 @@ public class CollisionDetector
 	{
 		CollisionAlgorithm algorithm = findSuitableAlgorithm(a, b);
 
-		System.out.println(algorithm);
-
 		if (algorithm == null)
 			return null;
 
 		return algorithm.detectCollision(a, b);
 	}
 
-	public static void registerAlgorithm(CollisionAlgorithm algorithm)
+	public static synchronized void registerAlgorithm(CollisionAlgorithm algorithm)
 	{
 		algorithms.put(algorithm.getDescriptor(), algorithm);
 	}
 
-	private static CollisionAlgorithm findSuitableAlgorithm(CollisionObject a, CollisionObject b)
+	private static synchronized CollisionAlgorithm findSuitableAlgorithm(CollisionObject a, CollisionObject b)
 	{
 		// Look for an exact match first
 		CollisionAlgorithmDescriptor algorithmDescriptor = new CollisionAlgorithmDescriptor(a.getShape().getClass(), b.getShape().getClass());

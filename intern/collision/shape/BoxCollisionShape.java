@@ -19,6 +19,7 @@ public class BoxCollisionShape extends ConvexPolyhedronCollisionShape
 
 	public final Vector minPoint, maxPoint;
 
+	protected Object cacheLock;
 	protected Matrix cachedFrame, cachedFrameInverse;
 
 	public BoxCollisionShape(Vector minPoint, Vector maxPoint)
@@ -26,6 +27,7 @@ public class BoxCollisionShape extends ConvexPolyhedronCollisionShape
 		this.minPoint = minPoint;
 		this.maxPoint = maxPoint;
 
+		this.cacheLock = new Object();
 		this.cachedFrame = new Matrix();
 		this.cachedFrameInverse = new Matrix();
 	}
@@ -70,122 +72,125 @@ public class BoxCollisionShape extends ConvexPolyhedronCollisionShape
 	@Override
 	public float castRay(final Matrix frame, final Ray ray, CollisionPoint hitPoint)
 	{
-		this.cacheFrameMatrix(frame);
-
-		Ray r = this.cachedFrameInverse.multiply(ray);
-
-		// Negative x face
-		if (r.direction.x > 0.0f)
+		synchronized (this.cacheLock)
 		{
-			float t = (this.minPoint.x - r.origin.x) / r.direction.x;
-			Vector point = r.at(t);
+			this.cacheFrameMatrix(frame);
 
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
-					if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(-1.0f, 0.0f, 0.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
-		}
+			Ray r = this.cachedFrameInverse.multiply(ray);
 
-		// Negative y face
-		if (r.direction.y > 0.0f)
-		{
-			float t = (this.minPoint.y - r.origin.y) / r.direction.y;
-			Vector point = r.at(t);
+			// Negative x face
+			if (r.direction.x > 0.0f)
+			{
+				float t = (this.minPoint.x - r.origin.x) / r.direction.x;
+				Vector point = r.at(t);
 
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
-					if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, -1.0f, 0.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
-		}
-
-		// Negative z face
-		if (r.direction.z > 0.0f)
-		{
-			float t = (this.minPoint.z - r.origin.z) / r.direction.z;
-			Vector point = r.at(t);
-
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+				if (t >= r.minTime && t <= r.maxTime)
 					if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 0.0f, -1.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
-		}
+						if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(-1.0f, 0.0f, 0.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
 
-		// Positive x face
-		if (r.direction.x < 0.0f)
-		{
-			float t = (this.maxPoint.x - r.origin.x) / r.direction.x;
-			Vector point = r.at(t);
+			// Negative y face
+			if (r.direction.y > 0.0f)
+			{
+				float t = (this.minPoint.y - r.origin.y) / r.direction.y;
+				Vector point = r.at(t);
 
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
-					if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(1.0f, 0.0f, 0.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
-		}
+				if (t >= r.minTime && t <= r.maxTime)
+					if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+						if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, -1.0f, 0.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
 
-		// Positive y face
-		if (r.direction.y < 0.0f)
-		{
-			float t = (this.maxPoint.y - r.origin.y) / r.direction.y;
-			Vector point = r.at(t);
+			// Negative z face
+			if (r.direction.z > 0.0f)
+			{
+				float t = (this.minPoint.z - r.origin.z) / r.direction.z;
+				Vector point = r.at(t);
 
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
-					if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 1.0f, 0.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
-		}
+				if (t >= r.minTime && t <= r.maxTime)
+					if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+						if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 0.0f, -1.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
 
-		// Positive z face
-		if (r.direction.z < 0.0f)
-		{
-			float t = (this.maxPoint.z - r.origin.z) / r.direction.z;
-			Vector point = r.at(t);
+			// Positive x face
+			if (r.direction.x < 0.0f)
+			{
+				float t = (this.maxPoint.x - r.origin.x) / r.direction.x;
+				Vector point = r.at(t);
 
-			if (t >= r.minTime && t <= r.maxTime)
-				if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+				if (t >= r.minTime && t <= r.maxTime)
 					if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
-					{
-						hitPoint.localPointA = new Vector(point);
-						hitPoint.localPointB = new Vector(point);
-						hitPoint.worldPointA = this.cachedFrame.multiply(point);
-						hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
-						hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 0.0f, 1.0f));
-						return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
-					}
+						if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(1.0f, 0.0f, 0.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
+
+			// Positive y face
+			if (r.direction.y < 0.0f)
+			{
+				float t = (this.maxPoint.y - r.origin.y) / r.direction.y;
+				Vector point = r.at(t);
+
+				if (t >= r.minTime && t <= r.maxTime)
+					if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+						if (point.z >= this.minPoint.z && point.z <= this.maxPoint.z)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 1.0f, 0.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
+
+			// Positive z face
+			if (r.direction.z < 0.0f)
+			{
+				float t = (this.maxPoint.z - r.origin.z) / r.direction.z;
+				Vector point = r.at(t);
+
+				if (t >= r.minTime && t <= r.maxTime)
+					if (point.x >= this.minPoint.x && point.x <= this.maxPoint.x)
+						if (point.y >= this.minPoint.y && point.y <= this.maxPoint.y)
+						{
+							hitPoint.localPointA = new Vector(point);
+							hitPoint.localPointB = new Vector(point);
+							hitPoint.worldPointA = this.cachedFrame.multiply(point);
+							hitPoint.worldPointB = new Vector(hitPoint.worldPointA);
+							hitPoint.worldNormalB = this.cachedFrame.as3x3().multiply(new Vector(0.0f, 0.0f, 1.0f));
+							return this.cachedFrame.as3x3().multiply(point.subtract(r.origin)).length();
+						}
+			}
 		}
 
 		hitPoint.localPointA = new Vector();
@@ -199,47 +204,52 @@ public class BoxCollisionShape extends ConvexPolyhedronCollisionShape
 	@Override
 	public float getGreatestPointAlongAxis(final Matrix frame, final Vector axis, Vector point)
 	{
-		System.out.println("BoxCollisionShape.getGreatestPointAlongAxis");
-		this.cacheFrameMatrix(frame);
-
-		Vector transformedAxis = this.cachedFrameInverse.as3x3().multiply(axis);
-
-		Vector[] vertices = new Vector[] {
-			new Vector(this.maxPoint),
-			new Vector(this.maxPoint.x, this.maxPoint.y, this.minPoint.z),
-			new Vector(this.maxPoint.x, this.minPoint.y, this.maxPoint.z),
-			new Vector(this.maxPoint.x, this.minPoint.y, this.minPoint.z),
-			new Vector(this.minPoint.x, this.maxPoint.y, this.maxPoint.z),
-			new Vector(this.minPoint.x, this.maxPoint.y, this.minPoint.z),
-			new Vector(this.minPoint.x, this.minPoint.y, this.maxPoint.z),
-			new Vector(this.minPoint)
-		};
-
-		float greatestProjection = Float.NEGATIVE_INFINITY;
-		Vector greatestVertex = new Vector();
-
-		for (int i = 0; i < vertices.length; i++)
+		synchronized (this.cacheLock)
 		{
-			float projection = transformedAxis.dot(vertices[i]);
-			if (projection > greatestProjection)
+			this.cacheFrameMatrix(frame);
+
+			Vector transformedAxis = this.cachedFrameInverse.as3x3().multiply(axis);
+
+			Vector[] vertices = new Vector[] {
+				new Vector(this.maxPoint),
+				new Vector(this.maxPoint.x, this.maxPoint.y, this.minPoint.z),
+				new Vector(this.maxPoint.x, this.minPoint.y, this.maxPoint.z),
+				new Vector(this.maxPoint.x, this.minPoint.y, this.minPoint.z),
+				new Vector(this.minPoint.x, this.maxPoint.y, this.maxPoint.z),
+				new Vector(this.minPoint.x, this.maxPoint.y, this.minPoint.z),
+				new Vector(this.minPoint.x, this.minPoint.y, this.maxPoint.z),
+				new Vector(this.minPoint)
+			};
+
+			float greatestProjection = Float.NEGATIVE_INFINITY;
+			Vector greatestVertex = new Vector();
+
+			for (int i = 0; i < vertices.length; i++)
 			{
-				greatestProjection = projection;
-				greatestVertex = vertices[i];
+				float projection = transformedAxis.dot(vertices[i]);
+				if (projection > greatestProjection)
+				{
+					greatestProjection = projection;
+					greatestVertex = vertices[i];
+				}
 			}
+
+			if (point == null)
+				point = new Vector();
+
+			point.set(this.cachedFrame.multiply(greatestVertex));
 		}
-
-		if (point == null)
-			point = new Vector();
-
-		point.set(this.cachedFrame.multiply(greatestVertex));
 		return axis.dot(point);
 	}
 
 	@Override
 	public Vector getLocalPoint(Matrix frame, Vector point)
 	{
-		this.cacheFrameMatrix(frame);
-		return this.cachedFrameInverse.multiply(point);
+		synchronized (this.cacheLock)
+		{
+			this.cacheFrameMatrix(frame);
+			return this.cachedFrameInverse.multiply(point);
+		}
 	}
 
 	@Override
@@ -309,7 +319,6 @@ public class BoxCollisionShape extends ConvexPolyhedronCollisionShape
 
 	protected void cacheFrameMatrix(Matrix frame)
 	{
-		System.out.println("BoxCollisionShape.cacheFrameMatrix");
 		if (frame.equals(this.cachedFrame))
 			return;
 
