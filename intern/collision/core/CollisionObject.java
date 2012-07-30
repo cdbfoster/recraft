@@ -68,6 +68,11 @@ public class CollisionObject implements Serializable
 		return new Matrix(this.transform);
 	}
 
+	public void getAABB(Vector aabbMin, Vector aabbMax)
+	{
+		this.shape.getAABB(this.transform, aabbMin, aabbMax);
+	}
+
 	public CollisionShape getShape()
 	{
 		return this.shape;
