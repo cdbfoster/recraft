@@ -22,7 +22,7 @@ public class CollisionObject implements Serializable
 	protected Matrix transform;
 
 	protected Vector linearVelocity;
-	protected Vector angularVelocity;
+	//protected Vector angularVelocity;
 
 	public CollisionObject(CollisionShape shape)
 	{
@@ -31,7 +31,7 @@ public class CollisionObject implements Serializable
 		this.transform = new Matrix();
 
 		this.linearVelocity = new Vector();
-		this.angularVelocity = new Vector();
+		//this.angularVelocity = new Vector();
 	}
 
 	public CollisionObject(CollisionShape shape, Matrix transform)
