@@ -19,4 +19,17 @@ public class CollisionPoint implements Serializable
 	public Vector localPointA, localPointB;
 	public Vector worldPointA, worldPointB;
 	public Vector worldNormalB;
+
+	public CollisionPoint reverse()
+	{
+		CollisionPoint result = new CollisionPoint();
+
+		result.localPointA = this.localPointB;
+		result.localPointB = this.localPointA;
+		result.worldPointA = this.worldPointB;
+		result.worldPointB = this.worldPointA;
+		result.worldNormalB = this.worldNormalB.multiply(-1.0f);
+
+		return result;
+	}
 }

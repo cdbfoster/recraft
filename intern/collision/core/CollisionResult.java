@@ -16,4 +16,15 @@ public class CollisionResult implements Serializable
 
 	public CollisionObject a, b;
 	public CollisionPoint point;
+
+	public CollisionResult reverse()
+	{
+		CollisionResult result = new CollisionResult();
+
+		result.a = this.b;
+		result.b = this.a;
+		result.point = this.point.reverse();
+
+		return result;
+	}
 }
