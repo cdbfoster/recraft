@@ -173,6 +173,12 @@ public class Matrix implements Serializable
 			this.m[axis][i] = value.get(i);
 	}
 
+	public Vector scalePart()
+	{
+		Matrix scaleMatrix = this.as3x3().multiply(this.rotationPart().inverted());
+		return new Vector(scaleMatrix.m[0][0], scaleMatrix.m[1][1], scaleMatrix.m[2][2]);
+	}
+
 	public Matrix rotationPart()
 	{
 		Matrix normalizedMatrix = this.normalized().as3x3();
@@ -184,12 +190,6 @@ public class Matrix implements Serializable
 		}
 
 		return normalizedMatrix;
-	}
-
-	public Vector scalePart()
-	{
-		Matrix scaleMatrix = this.as3x3().multiply(this.rotationPart().inverted());
-		return new Vector(scaleMatrix.m[0][0], scaleMatrix.m[1][1], scaleMatrix.m[2][2]);
 	}
 
 	public Vector translationPart()
@@ -258,6 +258,19 @@ public class Matrix implements Serializable
 						  this.m[2][0] * b.x + this.m[2][1] * b.y + this.m[2][2] * b.z + this.m[2][3] * 1.0f);
 	}
 
+	public static Matrix scale(float scaleX, float scaleY, float scaleZ)
+	{
+		return new Matrix(scaleX, 0.0f, 0.0f, 0.0f,
+						  0.0f, scaleY, 0.0f, 0.0f,
+						  0.0f, 0.0f, scaleZ, 0.0f,
+						  0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
+	public static Matrix scale(Vector scaleXYZ)
+	{
+		return scale(scaleXYZ.x, scaleXYZ.y, scaleXYZ.z);
+	}
+
 	public static Matrix rotate(float radiansX, float radiansY, float radiansZ)
 	{
 		Matrix xRotation = new Matrix();
@@ -284,17 +297,9 @@ public class Matrix implements Serializable
 		return zRotation.multiply(yRotation).multiply(xRotation);
 	}
 
-	public static Matrix scale(float scaleX, float scaleY, float scaleZ)
+	public static Matrix rotate(Vector radiansXYZ)
 	{
-		return new Matrix(scaleX, 0.0f, 0.0f, 0.0f,
-						  0.0f, scaleY, 0.0f, 0.0f,
-						  0.0f, 0.0f, scaleZ, 0.0f,
-						  0.0f, 0.0f, 0.0f, 1.0f);
-	}
-
-	public static Matrix scale(Vector scaleXYZ)
-	{
-		return scale(scaleXYZ.x, scaleXYZ.y, scaleXYZ.z);
+		return rotate(radiansXYZ.x, radiansXYZ.y, radiansXYZ.z);
 	}
 
 	public static Matrix translate(float translationX, float translationY, float translationZ)
