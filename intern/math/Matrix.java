@@ -314,30 +314,24 @@ public class Matrix implements Serializable
 			cos(Y) * sin(Z)		cos(X) * cos(Z) + sin(X) * sin(Y) * sin(Z)		cos(X) * sin(Y) * sin(Z) - sin(X) * cos(Z)		0
 			-sin(Y)				sin(X) * cos(Y)									cos(X) * cos(Y)									0
 			0					0												0												1
+		 Rotation order: XYZ
 		*/
 
-		Matrix xRotation = new Matrix();
-		if (Math.abs(radiansX) > Constants.FLT_EPSILON)
-			xRotation = new Matrix(1.0f, 0.0f, 0.0f, 0.0f,
-								   0.0f, (float)Math.cos(radiansX), -(float)Math.sin(radiansX), 0.0f,
-								   0.0f, (float)Math.sin(radiansX), (float)Math.cos(radiansX), 0.0f,
-								   0.0f, 0.0f, 0.0f, 1.0f);
+		double SinX = Math.sin(radiansX);
+		double SinY = Math.sin(radiansY);
+		double SinZ = Math.sin(radiansZ);
+		double CosX = Math.cos(radiansX);
+		double CosY = Math.cos(radiansY);
+		double CosZ = Math.cos(radiansZ);
+		double SinXSinZ = SinX * SinZ;
+		double SinXCosZ = SinX * CosZ;
+		double CosXSinZ = CosX * SinZ;
+		double CosXCosZ = CosX * CosZ;
 
-		Matrix yRotation = new Matrix();
-		if (Math.abs(radiansY) > Constants.FLT_EPSILON)
-			yRotation = new Matrix((float)Math.cos(radiansY), 0.0f, (float)Math.sin(radiansY), 0.0f,
-								   0.0f, 1.0f, 0.0f, 0.0f,
-								   -(float)Math.sin(radiansY), 0.0f, (float)Math.cos(radiansY), 0.0f,
-								   0.0f, 0.0f, 0.0f, 1.0f);
-
-		Matrix zRotation = new Matrix();
-		if (Math.abs(radiansZ) > Constants.FLT_EPSILON)
-			zRotation = new Matrix((float)Math.cos(radiansZ), -(float)Math.sin(radiansZ), 0.0f, 0.0f,
-								   (float)Math.sin(radiansZ), (float)Math.cos(radiansZ), 0.0f, 0.0f,
-								   0.0f, 0.0f, 1.0f, 0.0f,
-								   0.0f, 0.0f, 0.0f, 1.0f);
-
-		return zRotation.multiply(yRotation).multiply(xRotation);
+		return new Matrix((float)(CosY * CosZ), (float)(SinY * SinXCosZ - CosXSinZ), (float)(SinY * CosXCosZ + SinXSinZ), 0.0f,
+						  (float)(CosY * SinZ), (float)(SinY * SinXSinZ + CosXCosZ), (float)(SinY * CosXSinZ - SinXCosZ), 0.0f,
+						  (float)(-SinY),       (float)(SinX * CosY),                (float)(CosX * CosY),                0.0f,
+						  0.0f,                 0.0f,                                0.0f,                                1.0f);
 	}
 
 	public static Matrix rotate(Vector radiansXYZ)
