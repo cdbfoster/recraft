@@ -8,6 +8,7 @@
 
 package collision.algorithm;
 
+import math.Constants;
 import math.Matrix;
 import math.Vector;
 import collision.core.CollisionAlgorithm;
@@ -90,7 +91,7 @@ public class ConvexPolyhedronConvexPolyhedronCollisionAlgorithm implements Colli
 
 				Vector axis = edgeA.cross(edgeB);
 
-				if (axis.isZero(0.000001f))
+				if (axis.isZero(16.0f * Constants.FLT_EPSILON))
 					continue;
 
 				axis.normalize();
