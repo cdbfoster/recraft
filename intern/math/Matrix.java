@@ -192,6 +192,41 @@ public class Matrix implements Serializable
 		return normalizedMatrix;
 	}
 
+	public Vector rotationPartAsEuler()
+	{
+		Matrix matrix = this.rotationPart();
+
+		Vector euler1 = new Vector();
+		Vector euler2 = new Vector();
+
+		float CosY = (float)Math.sqrt(matrix.m[0][0] * matrix.m[0][0] + matrix.m[1][0] * matrix.m[1][0]);
+
+		if (CosY > 16.0f * Constants.FLT_EPSILON)
+		{
+			euler1.x = (float)Math.atan2(matrix.m[2][1], matrix.m[2][2]);
+			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
+			euler1.z = (float)Math.atan2(matrix.m[1][0], matrix.m[0][0]);
+
+			euler2.x = (float)Math.atan2(-matrix.m[2][1], -matrix.m[2][2]);
+			euler2.y = (float)Math.atan2(-matrix.m[2][0], -CosY);
+			euler2.z = (float)Math.atan2(-matrix.m[1][0], -matrix.m[0][0]);
+		}
+		else
+		{
+			euler1.x = (float)Math.atan2(-matrix.m[1][2], matrix.m[1][1]);
+			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
+			euler1.z = 0.0f;
+
+			euler2.set(euler1);
+		}
+
+		// Return the one with lower values in it
+		if (Math.abs(euler1.x) + Math.abs(euler1.y) + Math.abs(euler1.z) > Math.abs(euler2.x) + Math.abs(euler2.y) + Math.abs(euler2.z))
+			return euler2;
+		else
+			return euler1;
+	}
+
 	public Vector translationPart()
 	{
 		return new Vector(this.m[0][3], this.m[1][3], this.m[2][3]);
@@ -273,6 +308,14 @@ public class Matrix implements Serializable
 
 	public static Matrix rotate(float radiansX, float radiansY, float radiansZ)
 	{
+		/*
+		 Creates the following rotation matrix:
+			cos(Y) * cos(Z)		sin(X) * sin(Y) * cos(Z) - cos(X) * sin(Z)		cos(X) * sin(Y) * cos(Z) + sin(X) * sin(Z)		0
+			cos(Y) * sin(Z)		cos(X) * cos(Z) + sin(X) * sin(Y) * sin(Z)		cos(X) * sin(Y) * sin(Z) - sin(X) * cos(Z)		0
+			-sin(Y)				sin(X) * cos(Y)									cos(X) * cos(Y)									0
+			0					0												0												1
+		*/
+
 		Matrix xRotation = new Matrix();
 		if (Math.abs(radiansX) > Constants.FLT_EPSILON)
 			xRotation = new Matrix(1.0f, 0.0f, 0.0f, 0.0f,
