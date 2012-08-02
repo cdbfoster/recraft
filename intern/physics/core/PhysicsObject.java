@@ -8,32 +8,12 @@
 
 package physics.core;
 
-import math.Matrix;
 import math.Vector;
 import collision.core.CollisionObject;
 
 public interface PhysicsObject
 {
-	void setPosition(Vector position);
-	Vector getPosition();
-
-	void setEulerRotation(Vector radians);
-	Vector getEulerRotation();
-
-	void setScale(Vector scale);
-	Vector getScale();
-
-	void setTransform(Matrix transform);
-	Matrix getTransform();
-
-	void setLinearVelocity(Vector linearVelocity);
-	Vector getLinearVelocity();
-
-	void setLinearAcceleration(Vector linearAcceleration);
-	Vector getLinearAcceleration();
-
-	//void setAngularVelocity(Vector angularVelocity);
-	//Vector getAngularVelocity();
+	MotionState getMotionState();
 
 	void applyForce(Vector force);
 	void clearForce();
@@ -43,7 +23,8 @@ public interface PhysicsObject
 
 	CollisionNotified getNotifiedObject();
 
-	void update();
+	void updateMotionState();
+	void updateCollisionObjects();
 
 	CollisionObject GetBroadphaseProxy();
 	CollisionObject GetNarrowphaseProxy();
