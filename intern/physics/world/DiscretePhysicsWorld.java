@@ -13,10 +13,10 @@ import java.util.List;
 
 import physics.core.Broadphase;
 import physics.core.Broadphase.BroadphasePair;
+import physics.core.PhysicsCollision;
 import physics.core.Narrowphase;
 import physics.core.PhysicsObject;
 import physics.core.PhysicsWorld;
-import collision.core.CollisionResult;
 
 public class DiscretePhysicsWorld implements PhysicsWorld
 {
@@ -94,7 +94,7 @@ public class DiscretePhysicsWorld implements PhysicsWorld
 	{
 		this.predictMotion(timeStep);
 
-		List<CollisionResult> collisions = this.detectCollision();
+		List<PhysicsCollision> collisions = this.detectCollision();
 
 		this.solveConstraints(collisions);
 	}
@@ -109,16 +109,16 @@ public class DiscretePhysicsWorld implements PhysicsWorld
 		// TODO Integrate velocities
 	}
 
-	protected List<CollisionResult> detectCollision()
+	protected List<PhysicsCollision> detectCollision()
 	{
 		List<BroadphasePair> broadphasePairs = this.broadphase.calculateOverlappingPairs(worldObjects);
 
-		List<CollisionResult> collisions = this.narrowphase.calculateCollisions(broadphasePairs);
+		List<PhysicsCollision> collisions = this.narrowphase.calculateCollisions(broadphasePairs);
 
 		return collisions;
 	}
 
-	protected void solveConstraints(List<CollisionResult> collisions)
+	protected void solveConstraints(List<PhysicsCollision> collisions)
 	{
 		// TODO Solve constraints
 	}

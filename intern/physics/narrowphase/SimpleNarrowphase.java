@@ -14,30 +14,36 @@ import java.util.ListIterator;
 
 import physics.core.Broadphase.BroadphasePair;
 import physics.core.Narrowphase;
+import physics.core.PhysicsCollision;
 import collision.core.CollisionDetector;
-import collision.core.CollisionResult;
+import collision.core.CollisionPoint;
 
 public class SimpleNarrowphase implements Narrowphase
 {
 	@Override
-	public List<CollisionResult> calculateCollisions(List<BroadphasePair> pairs)
+	public List<PhysicsCollision> calculateCollisions(List<BroadphasePair> pairs)
 	{
-		List<CollisionResult> collisions = new LinkedList<CollisionResult>();
+		List<PhysicsCollision> collisions = new LinkedList<PhysicsCollision>();
 
 		ListIterator<BroadphasePair> pairIterator = pairs.listIterator();
 		while (pairIterator.hasNext())
 		{
 			BroadphasePair pair = pairIterator.next();
 
-			CollisionResult result = CollisionDetector.detectCollision(pair.a.GetNarrowphaseProxy(), pair.b.GetNarrowphaseProxy());
+			CollisionPoint point = CollisionDetector.detectCollision(pair.a.GetNarrowphaseProxy(), pair.b.GetNarrowphaseProxy());
 
-			if (result == null)
+			if (point == null)
 				continue;
 
-			pair.a.getNotifiedObject().AddCollision(result);
-			pair.b.getNotifiedObject().AddCollision(result.reverse());
+			PhysicsCollision collision = new PhysicsCollision();
+			collision.a = pair.a;
+			collision.b = pair.b;
+			collision.point = point;
 
-			collisions.add(result);
+			pair.a.getNotifiedObject().AddCollision(collision);
+			pair.b.getNotifiedObject().AddCollision(collision.reverse());
+
+			collisions.add(collision);
 		}
 
 		return collisions;

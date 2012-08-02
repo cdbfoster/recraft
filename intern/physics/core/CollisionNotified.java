@@ -11,26 +11,25 @@ package physics.core;
 import java.util.LinkedList;
 import java.util.List;
 
-import collision.core.CollisionResult;
 
 public class CollisionNotified
 {
-	protected List<CollisionResult> collisions;
+	protected List<PhysicsCollision> collisions;
 
 	public boolean isCollided()
 	{
 		return (this.collisions != null);
 	}
 
-	public void AddCollision(CollisionResult collision)
+	public void AddCollision(PhysicsCollision collision)
 	{
 		if (this.collisions == null)
-			this.collisions = new LinkedList<CollisionResult>();
+			this.collisions = new LinkedList<PhysicsCollision>();
 
 		this.collisions.add(collision);
 	}
 
-	public List<CollisionResult> getCollisions()
+	public List<PhysicsCollision> getCollisions()
 	{
 		return this.collisions;
 	}

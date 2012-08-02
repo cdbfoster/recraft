@@ -11,9 +11,8 @@ package physics.core;
 import java.util.List;
 
 import physics.core.Broadphase.BroadphasePair;
-import collision.core.CollisionResult;
 
 public interface Narrowphase
 {
-	List<CollisionResult> calculateCollisions(List<BroadphasePair> pairs);
+	List<PhysicsCollision> calculateCollisions(List<BroadphasePair> pairs);
 }

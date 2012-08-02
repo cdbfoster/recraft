@@ -1,25 +1,27 @@
 /********************************************************************************
  *                                                                              *
- *  This file is part of the Tiny Collision Library.                            *
+ *  This file is part of the Tiny Physics Library.                              *
  *                                                                              *
  *  Copyright 2012 Chris Foster                                                 *
  *                                                                              *
  ********************************************************************************/
 
-package collision.core;
+package physics.core;
 
 import java.io.Serializable;
 
-public class CollisionResult implements Serializable
+import collision.core.CollisionPoint;
+
+public class PhysicsCollision implements Serializable
 {
 	private static final long serialVersionUID = -4188813862977422853L;
 
-	public CollisionObject a, b;
+	public PhysicsObject a, b;
 	public CollisionPoint point;
 
-	public CollisionResult reverse()
+	public PhysicsCollision reverse()
 	{
-		CollisionResult result = new CollisionResult();
+		PhysicsCollision result = new PhysicsCollision();
 
 		result.a = this.b;
 		result.b = this.a;

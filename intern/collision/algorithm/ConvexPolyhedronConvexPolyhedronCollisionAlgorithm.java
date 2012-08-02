@@ -14,13 +14,12 @@ import math.Vector;
 import collision.core.CollisionAlgorithm;
 import collision.core.CollisionObject;
 import collision.core.CollisionPoint;
-import collision.core.CollisionResult;
 import collision.shape.ConvexPolyhedronCollisionShape;
 
 public class ConvexPolyhedronConvexPolyhedronCollisionAlgorithm implements CollisionAlgorithm
 {
 	@Override
-	public CollisionResult detectCollision(CollisionObject a, CollisionObject b)
+	public CollisionPoint detectCollision(CollisionObject a, CollisionObject b)
 	{
 		ConvexPolyhedronCollisionShape shapeA = (ConvexPolyhedronCollisionShape)a.getShape();
 		ConvexPolyhedronCollisionShape shapeB = (ConvexPolyhedronCollisionShape)b.getShape();
@@ -118,15 +117,12 @@ public class ConvexPolyhedronConvexPolyhedronCollisionAlgorithm implements Colli
 			}
 		}
 
-		CollisionResult result = new CollisionResult();
-		result.a = a;
-		result.b = b;
-		result.point = new CollisionPoint();
-		result.point.localPointA = shapeA.getLocalPoint(transformA, leastOverlapPointA);
-		result.point.localPointB = shapeB.getLocalPoint(transformB, leastOverlapPointB);
-		result.point.worldNormalB = leastOverlapNormal;
-		result.point.worldPointA = leastOverlapPointA;
-		result.point.worldPointB = leastOverlapPointB;
+		CollisionPoint result = new CollisionPoint();
+		result.localPointA = shapeA.getLocalPoint(transformA, leastOverlapPointA);
+		result.localPointB = shapeB.getLocalPoint(transformB, leastOverlapPointB);
+		result.worldNormalB = leastOverlapNormal;
+		result.worldPointA = leastOverlapPointA;
+		result.worldPointB = leastOverlapPointB;
 
 		return result;
 	}

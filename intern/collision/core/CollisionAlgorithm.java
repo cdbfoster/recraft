@@ -10,7 +10,7 @@ package collision.core;
 
 public interface CollisionAlgorithm
 {
-	CollisionResult detectCollision(CollisionObject a, CollisionObject b);
+	CollisionPoint detectCollision(CollisionObject a, CollisionObject b);
 
 	CollisionAlgorithmDescriptor getDescriptor();
 
