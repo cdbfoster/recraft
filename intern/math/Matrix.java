@@ -194,42 +194,24 @@ public class Matrix implements Serializable
 
 	public Vector rotationPartAsEuler()
 	{
-		Matrix matrix = this.rotationPart();
-
-		Vector euler1 = new Vector();
-		Vector euler2 = new Vector();
-
-		float CosY = (float)Math.sqrt(matrix.m[0][0] * matrix.m[0][0] + matrix.m[1][0] * matrix.m[1][0]);
-
-		if (CosY > 16.0f * Constants.FLT_EPSILON)
-		{
-			euler1.x = (float)Math.atan2(matrix.m[2][1], matrix.m[2][2]);
-			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
-			euler1.z = (float)Math.atan2(matrix.m[1][0], matrix.m[0][0]);
-
-			euler2.x = (float)Math.atan2(-matrix.m[2][1], -matrix.m[2][2]);
-			euler2.y = (float)Math.atan2(-matrix.m[2][0], -CosY);
-			euler2.z = (float)Math.atan2(-matrix.m[1][0], -matrix.m[0][0]);
-		}
-		else
-		{
-			euler1.x = (float)Math.atan2(-matrix.m[1][2], matrix.m[1][1]);
-			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
-			euler1.z = 0.0f;
-
-			euler2.set(euler1);
-		}
-
-		// Return the one with lower values in it
-		if (Math.abs(euler1.x) + Math.abs(euler1.y) + Math.abs(euler1.z) > Math.abs(euler2.x) + Math.abs(euler2.y) + Math.abs(euler2.z))
-			return euler2;
-		else
-			return euler1;
+		return this.rotationPartAsEuler(this.rotationPart());
 	}
 
 	public Vector translationPart()
 	{
 		return new Vector(this.m[0][3], this.m[1][3], this.m[2][3]);
+	}
+
+	public void deconstructMatrix(Vector translation, Vector eulerRotation, Vector scale)
+	{
+		translation.set(this.translationPart());
+
+		Matrix matrix = this.rotationPart();
+
+		eulerRotation.set(this.rotationPartAsEuler(matrix));
+
+		matrix = this.as3x3().multiply(matrix.inverted());
+		scale.set(matrix.m[0][0], matrix.m[1][1], matrix.m[2][2]);
 	}
 
 	public Matrix as3x3()
@@ -350,6 +332,39 @@ public class Matrix implements Serializable
 	public static Matrix translate(Vector translationXYZ)
 	{
 		return translate(translationXYZ.x, translationXYZ.y, translationXYZ.z);
+	}
+
+	private Vector rotationPartAsEuler(Matrix matrix)
+	{
+		Vector euler1 = new Vector();
+		Vector euler2 = new Vector();
+
+		float CosY = (float)Math.sqrt(matrix.m[0][0] * matrix.m[0][0] + matrix.m[1][0] * matrix.m[1][0]);
+
+		if (CosY > 16.0f * Constants.FLT_EPSILON)
+		{
+			euler1.x = (float)Math.atan2(matrix.m[2][1], matrix.m[2][2]);
+			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
+			euler1.z = (float)Math.atan2(matrix.m[1][0], matrix.m[0][0]);
+
+			euler2.x = (float)Math.atan2(-matrix.m[2][1], -matrix.m[2][2]);
+			euler2.y = (float)Math.atan2(-matrix.m[2][0], -CosY);
+			euler2.z = (float)Math.atan2(-matrix.m[1][0], -matrix.m[0][0]);
+		}
+		else
+		{
+			euler1.x = (float)Math.atan2(-matrix.m[1][2], matrix.m[1][1]);
+			euler1.y = (float)Math.atan2(-matrix.m[2][0], CosY);
+			euler1.z = 0.0f;
+
+			euler2.set(euler1);
+		}
+
+		// Return the one with lower values in it
+		if (Math.abs(euler1.x) + Math.abs(euler1.y) + Math.abs(euler1.z) > Math.abs(euler2.x) + Math.abs(euler2.y) + Math.abs(euler2.z))
+			return euler2;
+		else
+			return euler1;
 	}
 
 	private boolean isNegative()
