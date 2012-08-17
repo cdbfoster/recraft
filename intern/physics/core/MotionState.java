@@ -36,6 +36,18 @@ public class MotionState
 		this.linearAcceleration = new Vector(0.0f, 0.0f, 0.0f);
 	}
 
+	public MotionState(MotionState b)
+	{
+		this.position = new Vector(b.position);
+		this.eulerRotation = new Vector(b.eulerRotation);
+		this.scale = new Vector(b.scale);
+
+		this.transform = new Matrix(b.transform);
+
+		this.linearVelocity = new Vector(b.linearVelocity);
+		this.linearAcceleration = new Vector(b.linearAcceleration);
+	}
+
 	public void setPosition(Vector position)
 	{
 		this.position = new Vector(position);
@@ -105,5 +117,11 @@ public class MotionState
 	private void updateTransformComponents()
 	{
 		this.transform.deconstructMatrix(this.position, this.eulerRotation, this.scale);
+	}
+
+	@Override
+	public MotionState clone()
+	{
+		return new MotionState(this);
 	}
 }
