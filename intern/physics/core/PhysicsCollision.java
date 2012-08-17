@@ -17,6 +17,7 @@ public class PhysicsCollision implements Serializable
 	private static final long serialVersionUID = -4188813862977422853L;
 
 	public PhysicsObject a, b;
+	public MotionState aMotion, bMotion;
 	public CollisionPoint point;
 
 	public PhysicsCollision reverse()
@@ -25,6 +26,8 @@ public class PhysicsCollision implements Serializable
 
 		result.a = this.b;
 		result.b = this.a;
+		result.aMotion = this.bMotion;
+		result.bMotion = this.aMotion;
 		result.point = this.point.reverse();
 
 		return result;

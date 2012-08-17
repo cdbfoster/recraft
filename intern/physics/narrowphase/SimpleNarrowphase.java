@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import physics.core.Broadphase.BroadphasePair;
+import physics.core.MotionState;
 import physics.core.Narrowphase;
 import physics.core.PhysicsCollision;
 import collision.core.CollisionDetector;
@@ -38,6 +39,8 @@ public class SimpleNarrowphase implements Narrowphase
 			PhysicsCollision collision = new PhysicsCollision();
 			collision.a = pair.a;
 			collision.b = pair.b;
+			collision.aMotion = new MotionState(pair.a.getMotionState());
+			collision.bMotion = new MotionState(pair.b.getMotionState());
 			collision.point = point;
 
 			pair.a.getNotifiedObject().AddCollision(collision);
