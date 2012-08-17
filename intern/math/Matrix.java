@@ -334,6 +334,15 @@ public class Matrix implements Serializable
 		return translate(translationXYZ.x, translationXYZ.y, translationXYZ.z);
 	}
 
+	public static Matrix constructMatrix(Vector translation, Vector eulerRotation, Vector scale)
+	{
+		Matrix m = Matrix.rotate(eulerRotation);
+		return new Matrix(scale.x * m.m[0][0], scale.y * m.m[0][1], scale.z * m.m[0][2], translation.x,
+						  scale.x * m.m[1][0], scale.y * m.m[1][1], scale.z * m.m[1][2], translation.y,
+						  scale.x * m.m[2][0], scale.y * m.m[2][1], scale.z * m.m[2][2], translation.z,
+						  0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
 	private Vector rotationPartAsEuler(Matrix matrix)
 	{
 		Vector euler1 = new Vector();

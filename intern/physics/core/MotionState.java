@@ -99,7 +99,7 @@ public class MotionState
 
 	private void updateTransformMatrix()
 	{
-		this.transform = Matrix.translate(this.position).multiply(Matrix.rotate(this.eulerRotation)).multiply(Matrix.scale(this.scale));
+		this.transform = Matrix.constructMatrix(this.position, this.eulerRotation, this.scale);
 	}
 
 	private void updateTransformComponents()
