@@ -16,7 +16,6 @@ public interface PhysicsObject
 	MotionState getMotionState();
 
 	void applyForce(Vector force);
-	void clearForce();
 
 	void setMass(float mass);
 	float getMass();

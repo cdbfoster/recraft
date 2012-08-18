@@ -33,13 +33,8 @@ public class RigidBodyPhysicsObject extends CollisionNotified implements Physics
 	@Override
 	public void applyForce(Vector force)
 	{
-		// TODO Apply force
-	}
-
-	@Override
-	public void clearForce()
-	{
-		// TODO Clear all force
+		// linearAcceleration += force / mass;
+		this.motionState.setLinearAcceleration(this.motionState.getLinearAcceleration().add(force.divide(this.mass)));
 	}
 
 	@Override
@@ -85,5 +80,4 @@ public class RigidBodyPhysicsObject extends CollisionNotified implements Physics
 	{
 		return this.narrowphaseProxy;
 	}
-
 }
