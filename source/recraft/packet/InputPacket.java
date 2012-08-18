@@ -50,7 +50,7 @@ public class InputPacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s\n%s", formatString(id, "Input", this.tick), this.input.toString());
+		return String.format("%s\n%s", Packet.formatString(id, "Input", this.tick), this.input.toString());
 	}
 
 }
