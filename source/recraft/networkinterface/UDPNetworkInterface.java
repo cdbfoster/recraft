@@ -93,24 +93,15 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	@Override
 	public boolean sendPacket(NetworkNodeIdentifier node, Packet packet)
 	{
-		byte[] packetBytes = this.serializeObject(packet);
-
-		if (packetBytes == null)
-			return false;
-
-		DatagramPacket datagram = new DatagramPacket(packetBytes, packetBytes.length, node.inetAddress, node.port);
-
-		try
+		boolean result;
+		synchronized (this.lock)
 		{
-			this.socket.send(datagram);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+			if (this.socket == null)
+				return false;
 
-		return true;
+			result = this.internalSendPacket(node, packet);
+		}
+		return result;
 	}
 
 	@Override
@@ -139,8 +130,8 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 			ListIterator<NodePacketPair> packetIterator = this.outgoingPackets.listIterator();
 			while (packetIterator.hasNext())
 			{
-				NodePacketPair pair = (NodePacketPair)packetIterator.next();
-				totalSuccess &= this.sendPacket(pair.node, pair.packet);
+				NodePacketPair pair = packetIterator.next();
+				totalSuccess &= this.internalSendPacket(pair.node, pair.packet);
 			}
 
 			this.outgoingPackets.clear();
@@ -190,6 +181,23 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	}
 
 	@Override
+	public NetworkNodeIdentifier getLocalAddress()
+	{
+		NetworkNodeIdentifier local = null;
+
+		try
+		{
+			local = new NetworkNodeIdentifier("127.0.0.1", this.socket.getLocalPort());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return local;
+	}
+
+	@Override
 	public void close()
 	{
 		synchronized (this.lock)
@@ -223,6 +231,28 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 				this.incomingPacketsMap = null;
 			}
 		}
+	}
+
+	private boolean internalSendPacket(NetworkNodeIdentifier node, Packet packet)
+	{
+		byte[] packetBytes = this.serializeObject(packet);
+
+		if (packetBytes == null)
+			return false;
+
+		DatagramPacket datagram = new DatagramPacket(packetBytes, packetBytes.length, node.inetAddress, node.port);
+
+		try
+		{
+			this.socket.send(datagram);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
 
 	private byte[] serializeObject(Object object)
