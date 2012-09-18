@@ -28,7 +28,7 @@ public class InputPacket extends Packet
 {
 	private static final long serialVersionUID = 6103242153381881276L;
 
-	public static int id = 1;
+	public static int id = 5;
 
 	private Input input;
 
