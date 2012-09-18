@@ -46,6 +46,9 @@ public interface NetworkInterface extends Creatable
 	/** Clear the incoming packet queue */
 	void clearIncomingPackets();
 
+	/** Returns local address and port number the interface is listening on */
+	NetworkNodeIdentifier getLocalAddress();
+
 	/** Free all resources used by and prevent further communication through this network interface. */
 	void close();
 
@@ -58,6 +61,12 @@ public interface NetworkInterface extends Creatable
 		{
 			this.node = node;
 			this.packet = packet;
+		}
+
+		@Override
+		public String toString()
+		{
+			return String.format("Packet received from: %s\n%s", this.node, this.packet);
 		}
 	}
 }
