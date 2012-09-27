@@ -39,6 +39,11 @@ public class ClientMap<E extends Client>
 		return this.clients.put(node, client);
 	}
 
+	public E remove(NetworkNodeIdentifier node)
+	{
+		return this.clients.remove(node);
+	}
+
 	public E get(NetworkNodeIdentifier node)
 	{
 		return this.clients.get(node);
