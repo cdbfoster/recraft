@@ -325,7 +325,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 			while (!Thread.interrupted())
 			{
 				// Construct datagram to fill
-				byte[] packetBytes = new byte[10240]; // Max packet size is 10kB?  Is this too small? Too big?
+				byte[] packetBytes = new byte[16 * 1024]; // Max packet size is 16kB
 				DatagramPacket datagram = new DatagramPacket(packetBytes, packetBytes.length);
 
 				try
