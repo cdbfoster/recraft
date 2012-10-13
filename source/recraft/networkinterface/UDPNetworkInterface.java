@@ -23,6 +23,8 @@ package recraft.networkinterface;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,6 +34,8 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
@@ -40,6 +44,8 @@ import recraft.core.Packet;
 
 public class UDPNetworkInterface implements NetworkInterface, Creatable
 {
+	private static final int bufferSize = 64 * 1024; // 64kB
+
 	private DatagramSocket socket;
 
 	private LinkedList<NodePacketPair> outgoingPackets;
@@ -63,6 +69,8 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	public UDPNetworkInterface() throws SocketException
 	{
 		this.socket = new DatagramSocket();
+		this.socket.setSendBufferSize(UDPNetworkInterface.bufferSize);
+		this.socket.setReceiveBufferSize(UDPNetworkInterface.bufferSize);
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
@@ -78,6 +86,8 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	public UDPNetworkInterface(int port) throws SocketException
 	{
 		this.socket = new DatagramSocket(port);
+		this.socket.setSendBufferSize(UDPNetworkInterface.bufferSize);
+		this.socket.setReceiveBufferSize(UDPNetworkInterface.bufferSize);
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
@@ -268,7 +278,25 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 			objectStream.flush();
 
 			bytes = byteStream.toByteArray();
+			int decompressedLength = bytes.length;
 			objectStream.close();
+
+			Deflater deflater = new Deflater(Deflater.BEST_SPEED);
+			deflater.setInput(bytes, 0, decompressedLength);
+			deflater.finish();
+			int compressedLength = deflater.deflate(bytes);
+			deflater.end();
+
+			ByteArrayOutputStream finalByteStream = new ByteArrayOutputStream();
+			DataOutputStream finalDataStream = new DataOutputStream(finalByteStream);
+
+			finalDataStream.writeInt(compressedLength);
+			finalDataStream.writeInt(decompressedLength);
+			finalDataStream.write(bytes, 0, compressedLength);
+			finalDataStream.flush();
+
+			bytes = finalByteStream.toByteArray();
+			finalDataStream.close();
 		}
 		catch (Exception e)
 		{
@@ -343,7 +371,21 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 			try
 			{
-				ObjectInputStream objectStream = new ObjectInputStream(new ByteArrayInputStream(bytes));
+				DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(bytes));
+
+				int compressedLength = dataStream.readInt();
+				int decompressedLength = dataStream.readInt();
+				byte[] compressedBytes = new byte[compressedLength];
+				dataStream.read(compressedBytes);
+				dataStream.close();
+
+				Inflater inflater = new Inflater();
+				inflater.setInput(compressedBytes, 0, compressedLength);
+				byte[] decompressedBytes = new byte[decompressedLength];
+				inflater.inflate(decompressedBytes);
+				inflater.end();
+
+				ObjectInputStream objectStream = new ObjectInputStream(new ByteArrayInputStream(decompressedBytes));
 
 				object = objectStream.readObject();
 
