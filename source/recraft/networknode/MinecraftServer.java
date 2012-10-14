@@ -21,6 +21,8 @@
 
 package recraft.networknode;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -153,7 +155,23 @@ public class MinecraftServer extends NetworkNode
 
 	protected void sendClientLatencyTests()
 	{
+		Collection<MinecraftServerClient> clientList = this.clients.getClientList();
 
+		Iterator<MinecraftServerClient> clientIterator = clientList.iterator();
+		while (clientIterator.hasNext())
+		{
+			MinecraftServerClient client = clientIterator.next();
+			client.sendPacketLatencyTest(MinecraftServer.clientLatencyTestInterval);
+		}
+
+		Collection<MinecraftServerClient> clientStagingList = this.clientStaging.getClientList();
+
+		Iterator<MinecraftServerClient> clientStagingIterator = clientStagingList.iterator();
+		while (clientStagingIterator.hasNext())
+		{
+			MinecraftServerClient client = clientStagingIterator.next();
+			client.sendPacketLatencyTest(MinecraftServer.clientStagingLatencyTestInterval);
+		}
 	}
 
 	protected List<NodePacketPair> receivePackets()
@@ -181,7 +199,17 @@ public class MinecraftServer extends NetworkNode
 
 	protected void filterClientLatencyTestResponse(NodePacketPair pair)
 	{
+		MinecraftServerClient client = this.clients.get(pair.node);
 
+		if (client != null)
+			client.calculatePacketLatency(pair);
+		else
+		{
+			client = this.clientStaging.get(pair.node);
+
+			if (client != null)
+				client.calculatePacketLatency(pair);
+		}
 	}
 
 	protected void filterJoin(NodePacketPair pair)
