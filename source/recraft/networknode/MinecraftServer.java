@@ -37,29 +37,33 @@ import recraft.core.NetworkInterface;
 import recraft.core.NetworkInterface.NodePacketPair;
 import recraft.core.NetworkNode;
 import recraft.core.NetworkNodeIdentifier;
-import recraft.core.PlayerJoinRequest;
-import recraft.core.PlayerJoinResponse;
-import recraft.core.PlayerJoinResponse.ResponseType;
+import recraft.core.Stateable;
 import recraft.core.Timer;
-import recraft.packet.InputPacket;
-import recraft.packet.PlayerDisconnectPacket;
-import recraft.packet.PlayerJoinPacket;
-import recraft.packet.PlayerJoinRequestPacket;
-import recraft.packet.PlayerJoinResponsePacket;
-import recraft.stateable.world.MinecraftWorld;
+import recraft.packet.PingPacket;
 
 public class MinecraftServer extends NetworkNode implements Creatable
 {
-	private MinecraftWorld world;
+	protected static final int discardStateAge = 1000; // 1s
+	protected static final int clientLatencyTestInterval = 5000; // 5s
+	protected static final int clientStagingLatencyTestInterval = 500; // 0.5s
 
-	private int tick;
+	protected Stateable world;
 
-	private Object lock;
-	private boolean stopped;
+	protected int tick;
 
-	private NetworkNodeIdentifier localAddress;
+	protected Object lock;
+	protected boolean stopped;
 
-	public ClientMap<MinecraftServerClient> clients;
+	protected NetworkNodeIdentifier localAddress;
+
+	protected LinkedList<DeltaState> reverseWorldStates;
+	private List<NodePacketPair> clientInputPackets;
+
+	protected ClientMap<MinecraftServerClient> clients;
+	protected ClientMap<MinecraftServerClient> clientStaging;
+
+	protected List<NodePacketPair> filteredPackets;
+	protected List<NodePacketPair> requestQueue;
 
 	public static MinecraftServer create()
 	{
@@ -82,7 +86,7 @@ public class MinecraftServer extends NetworkNode implements Creatable
 		this.stopped = false;
 	}
 
-	public MinecraftServer(NetworkInterface networkInterface, MinecraftWorld world)
+	public MinecraftServer(NetworkInterface networkInterface, Stateable world)
 	{
 		this.networkInterface = networkInterface;
 		this.world = world;
@@ -94,16 +98,19 @@ public class MinecraftServer extends NetworkNode implements Creatable
 
 		this.localAddress = this.networkInterface.getLocalAddress();
 
+		this.reverseWorldStates = new LinkedList<DeltaState>();
+		this.clientInputPackets = new LinkedList<NodePacketPair>();
+
 		this.clients = new ClientMap<MinecraftServerClient>();
+		this.clientStaging = new ClientMap<MinecraftServerClient>();
+
+		this.filteredPackets = new LinkedList<NodePacketPair>();
+		this.requestQueue = new LinkedList<NodePacketPair>();
 	}
 
 	@Override
 	public void run()
 	{
-		// Server should keep a list of requested data and in a separate thread, dole them out in a timed manner
-
-
-
 		// Initialize (Use a "dummy client" to cause the server to generate the terrain around the spawn area)
 			// Request a random chunk
 			// If chunk is a suitable spawn location, request the chunks around it
@@ -126,68 +133,40 @@ public class MinecraftServer extends NetworkNode implements Creatable
 			int elapsedTicks = Timer.elapsedTicks(elapsedTime);
 
 			if (elapsedTicks > 0)
-				oldTime = currentTime;
+				oldTime = currentTime - Timer.millisecondRemainder(elapsedTime);
 
 			// Possibly cap elapsedTicks here?
+			if (elapsedTicks > 1)
+				System.out.println(String.format("Server is losing time! %d ticks to do!", elapsedTicks));
 
 			for (int i = 0; i < elapsedTicks; i++)
 			{
 				if ((this.tick % Timer.getTicksPerSecond()) == 0)
 					System.out.println(this.tick / Timer.getTicksPerSecond());
-		// Get, interpret, and filter packets (Server filters all non player command related packets, Client filters all non delta state related packets)
-			// Get the list of packets normally, can be null, and sync the list while reading
-			// Clear the networkInterface's incoming list when done
 
-				List<NodePacketPair> filteredPackets = new LinkedList<NodePacketPair>();
+				this.sendClientLatencyTests();
 
-				List<NodePacketPair> incomingPackets = this.networkInterface.getIncomingPackets();
+				List<NodePacketPair> receivedPackets = this.receivePackets();
 
-				if (incomingPackets != null)
+				ListIterator<NodePacketPair> packetIterator = receivedPackets.listIterator();
+				while (packetIterator.hasNext())
 				{
-					synchronized (incomingPackets)
-					{
-						// Check for joins and handle disconnects
-						this.handleClientChanges(incomingPackets);
+					NodePacketPair pair = packetIterator.next();
 
-						// Handle state requests
-
-						ListIterator<NodePacketPair> pairIterator = incomingPackets.listIterator();
-						while (pairIterator.hasNext())
-						{
-							NodePacketPair pair = pairIterator.next();
-							System.out.println(pair);
-
-							if (pair.packet instanceof InputPacket ||
-								pair.packet instanceof PlayerJoinPacket ||
-								pair.packet instanceof PlayerDisconnectPacket)
-							{
-								filteredPackets.add(pair);
-							}
-						}
-					}
-
-					this.networkInterface.clearIncomingPackets();
+					this.filterClientLatencyTestResponse(pair);
+					this.filterJoin(pair);
+					this.filterLeave(pair);
+					this.filterInput(pair);
+					this.filterStateRequest(pair);
 				}
 
-		// Open DeltaStates
-			// Call world.openDeltaState(tick);
+				// Actuation:
+				// Handle requests
 
-				this.world.openDeltaState(this.tick);
-
-		// Update the world with the filtered packets
-
-				this.world.update(filteredPackets);
-
-		// Close DeltaStates
-			// Call state = world.closeDeltaState();
-
-				DeltaState worldDeltaState = this.world.closeDeltaState();
-
-		// Modify DeltaStates per client (Using tailor method and a StateRequest) and send
-
-
+				// Handle inputs and world updates
 
 				this.tick++;
+
 			}
 		}
 	}
@@ -197,80 +176,117 @@ public class MinecraftServer extends NetworkNode implements Creatable
 	{
 		synchronized (this.lock)
 		{
-			//this.networkInterface.close(); // This should be the responsibility of whoever allocated the interface
 			this.stopped = true;
 		}
 	}
 
-	protected void handleClientChanges(List<NodePacketPair> incomingPackets)
+	protected void sendClientLatencyTests()
 	{
-		List<NodePacketPair> additionalPackets = new LinkedList<NodePacketPair>();
 
-		ListIterator<NodePacketPair> pairIterator = incomingPackets.listIterator();
-		while (pairIterator.hasNext())
+	}
+
+	protected List<NodePacketPair> receivePackets()
+	{
+		List<NodePacketPair> incomingPackets = this.networkInterface.getIncomingPackets();
+		List<NodePacketPair> receivedPackets = new LinkedList<NodePacketPair>();
+
+		synchronized (incomingPackets)
 		{
-			NodePacketPair pair = pairIterator.next();
-
-			MinecraftServerClient client = this.clients.get(pair.node);
-
-			if (client == null && pair.packet instanceof PlayerJoinRequestPacket)
+			long currentTime = Timer.getTimeInMilliseconds();
+			ListIterator<NodePacketPair> packetIterator = incomingPackets.listIterator();
+			while (packetIterator.hasNext())
 			{
-				PlayerJoinRequest joinRequest = (PlayerJoinRequest)pair.packet.open();
-				PlayerJoinResponse joinResponse = this.VerifyClient(joinRequest);
+				NodePacketPair pair = packetIterator.next();
 
-				if (joinResponse.responseType == ResponseType.ACCEPT)
-				{
-					MinecraftServerClient newClient = new MinecraftServerClient(this, pair.node, this.tick);
-					this.clients.put(pair.node, newClient);
-
-					NodePacketPair joinPacketPair = new NodePacketPair(this.localAddress, new PlayerJoinPacket(this.tick, joinRequest.playerName, pair.node));
-					additionalPackets.add(joinPacketPair);
-				}
-
-				PlayerJoinResponsePacket joinResponsePacket = new PlayerJoinResponsePacket(this.tick, joinResponse);
-				this.networkInterface.sendPacket(pair.node, joinResponsePacket);
+				if (Math.abs(currentTime - pair.time) < MinecraftServer.discardStateAge)
+					receivedPackets.add(pair);
 			}
-
-			if (client != null)
-			{
-				// set last activity to this tick
-			}
-
-			// if client != null and packet is a player disconnect, remove client from map
 		}
 
-		// for each client, if last activity was a while ago, remove client from map and send player disconnect packet to additionalPackets
+		this.networkInterface.clearIncomingPackets();
 
-		pairIterator = additionalPackets.listIterator();
-		while (pairIterator.hasNext())
-			incomingPackets.add(pairIterator.next());
+		return receivedPackets;
 	}
 
-	protected PlayerJoinResponse VerifyClient(PlayerJoinRequest joinRequest)
+	protected void filterClientLatencyTestResponse(NodePacketPair pair)
 	{
-		return new PlayerJoinResponse(ResponseType.ACCEPT, "Welcome!");
+
 	}
 
-	private static class MinecraftServerClient extends Client
+	protected void filterJoin(NodePacketPair pair)
 	{
-		public MinecraftServer server;
 
-		public NetworkNodeIdentifier nodeIdentifier;
+	}
+
+	protected void filterLeave(NodePacketPair pair)
+	{
+
+	}
+
+	protected void filterInput(NodePacketPair pair)
+	{
+
+	}
+
+	protected void filterStateRequest(NodePacketPair pair)
+	{
+
+	}
+
+	protected static class MinecraftServerClient extends Client
+	{
+		protected MinecraftServer server;
+		protected NetworkNodeIdentifier clientIdentifier;
 
 		public int loginTick;
 		public int lastActivityTick;
 
-		public MinecraftServerClient(MinecraftServer server, NetworkNodeIdentifier nodeIdentifier, int loginTick)
+		public boolean accepted;
+
+		public int requestsHandledThisTick;
+
+		public int packetLatency;
+		protected long lastLatencyTest;
+		protected boolean sentLatencyTest;
+
+		public MinecraftServerClient(MinecraftServer server, NetworkNodeIdentifier clientIdentifier, int loginTick)
 		{
 			this.server = server;
-			this.nodeIdentifier = nodeIdentifier;
+			this.clientIdentifier = clientIdentifier;
+
 			this.loginTick = loginTick;
 			this.lastActivityTick = this.loginTick;
+
+			this.accepted = false;
+
+			this.requestsHandledThisTick = 0;
+
+			this.packetLatency = 0;
+			this.lastLatencyTest = 0;
+			this.sentLatencyTest = false;
 		}
 
-		public void disconnect()
+		public void sendPacketLatencyTest(int testInterval)
 		{
+			long time = Timer.getTimeInMilliseconds();
+			if (Math.abs(time - this.lastLatencyTest) > testInterval)
+			{
+				if (this.sentLatencyTest)
+					// Ping was lost en route or latency was greater than latencyTestInterval
+					this.sentLatencyTest = false;
 
+				this.lastLatencyTest = time;
+				this.server.networkInterface.sendPacket(this.clientIdentifier, new PingPacket());
+				this.sentLatencyTest = true;
+			}
+		}
+
+		/** Called when the server picks up a ping response from a client */
+		public void calculatePacketLatency(NodePacketPair receivedPing)
+		{
+			if (this.sentLatencyTest)
+				this.sentLatencyTest = false;
+				this.packetLatency = (int)(Math.abs(receivedPing.time - this.lastLatencyTest) / 2);
 		}
 	}
 }
