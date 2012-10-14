@@ -31,11 +31,9 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -52,7 +50,6 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 	private List<NodePacketPair> outgoingPackets;
 	private List<NodePacketPair> incomingPackets;
-	private Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap;
 
 	private Thread listener;
 
@@ -76,9 +73,8 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
-		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, List<Packet>>();
 
-		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
+		this.listener = new Thread(new Listener(this.socket, this.incomingPackets));
 		this.listener.setDaemon(true);
 		this.listener.start();
 
@@ -93,9 +89,8 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
-		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, List<Packet>>();
 
-		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
+		this.listener = new Thread(new Listener(this.socket, this.incomingPackets));
 		this.listener.setDaemon(true);
 		this.listener.start();
 
@@ -163,17 +158,6 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	}
 
 	@Override
-	public Map<NetworkNodeIdentifier, List<Packet>> getIncomingPacketsMap()
-	{
-		synchronized (this.lock)
-		{
-			if (this.socket == null)
-				return null;
-		}
-		return this.incomingPacketsMap;
-	}
-
-	@Override
 	public void clearIncomingPackets()
 	{
 		synchronized (this.lock)
@@ -184,10 +168,6 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 			synchronized (this.incomingPackets)
 			{
 				this.incomingPackets.clear();
-			}
-			synchronized (this.incomingPacketsMap)
-			{
-				this.incomingPacketsMap.clear();
 			}
 		}
 	}
@@ -236,11 +216,6 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 			{
 				this.incomingPackets.clear();
 				this.incomingPackets = null;
-			}
-			synchronized (this.incomingPacketsMap)
-			{
-				this.incomingPacketsMap.clear();
-				this.incomingPacketsMap = null;
 			}
 		}
 	}
@@ -312,13 +287,11 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	{
 		private DatagramSocket socket;
 		private List<NodePacketPair> incomingPackets;
-		private Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap;
 
-		public Listener(DatagramSocket socket, List<NodePacketPair> incomingPackets, Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap)
+		public Listener(DatagramSocket socket, List<NodePacketPair> incomingPackets)
 		{
 			this.socket = socket;
 			this.incomingPackets = incomingPackets;
-			this.incomingPacketsMap = incomingPacketsMap;
 		}
 
 		@Override
@@ -349,20 +322,10 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 					continue;
 				NetworkNodeIdentifier node = new NetworkNodeIdentifier(datagram.getAddress(), datagram.getPort());
 
-				// Add the packet to the incoming queues
+				// Add the packet to the incoming queue
 				synchronized (this.incomingPackets)
 				{
 					this.incomingPackets.add(new NodePacketPair(node, packet));
-				}
-				synchronized (this.incomingPacketsMap)
-				{
-					if (!this.incomingPacketsMap.containsKey(node))
-					{
-						LinkedList<Packet> list = new LinkedList<Packet>();
-						list.add(packet);
-						this.incomingPacketsMap.put(node, list);
-					} else
-						this.incomingPacketsMap.get(node).add(packet);
 				}
 			}
 		}
