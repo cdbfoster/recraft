@@ -21,30 +21,11 @@
 
 package recraft.networknode;
 
-import recraft.core.Configurator;
-import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkNode;
-import recraft.core.Configurator.ConfiguratorCreatable;
-import recraft.core.Configurator.ConfiguratorSelect;
 
-public class MinecraftClient extends NetworkNode implements Creatable
+public class MinecraftClient extends NetworkNode
 {
-	public static MinecraftClient create()
-	{
-		return new MinecraftClient();
-	}
-
-	public MinecraftClient()
-	{
-		super();
-
-		ConfiguratorSelect interfaceSelect = (ConfiguratorSelect)Configurator.get("Options.Network.Network Interface");
-		ConfiguratorCreatable interfaceCreator= (ConfiguratorCreatable)interfaceSelect.getValue();
-
-		this.networkInterface = (NetworkInterface)interfaceCreator.create(null);
-	}
-
 	public MinecraftClient(NetworkInterface networkInterface)
 	{
 		this.networkInterface = networkInterface;
@@ -63,5 +44,4 @@ public class MinecraftClient extends NetworkNode implements Creatable
 		// TODO Auto-generated method stub
 
 	}
-
 }

@@ -27,11 +27,6 @@ import java.util.ListIterator;
 
 import recraft.core.Client;
 import recraft.core.ClientMap;
-import recraft.core.Configurator;
-import recraft.core.Configurator.ConfiguratorCreatable;
-import recraft.core.Configurator.ConfiguratorIntRange;
-import recraft.core.Configurator.ConfiguratorSelect;
-import recraft.core.Creatable;
 import recraft.core.DeltaState;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkInterface.NodePacketPair;
@@ -41,7 +36,7 @@ import recraft.core.Stateable;
 import recraft.core.Timer;
 import recraft.packet.PingPacket;
 
-public class MinecraftServer extends NetworkNode implements Creatable
+public class MinecraftServer extends NetworkNode
 {
 	protected static final int discardStateAge = 1000; // 1s
 	protected static final int clientLatencyTestInterval = 5000; // 5s
@@ -64,27 +59,6 @@ public class MinecraftServer extends NetworkNode implements Creatable
 
 	protected List<NodePacketPair> filteredPackets;
 	protected List<NodePacketPair> requestQueue;
-
-	public static MinecraftServer create()
-	{
-		return new MinecraftServer();
-	}
-
-	// Deprecate
-	public MinecraftServer()
-	{
-		super();
-
-		ConfiguratorSelect interfaceSelect = (ConfiguratorSelect)Configurator.get("Options.Network.Network Interface");
-		ConfiguratorCreatable interfaceCreator= (ConfiguratorCreatable)interfaceSelect.getValue();
-
-		ConfiguratorIntRange portRange = (ConfiguratorIntRange)Configurator.get("Options.Network.Network Nodes.Server.Bind Port");
-		Object[] parameters = {new Integer(portRange.getValue())};
-
-		this.networkInterface = (NetworkInterface)interfaceCreator.create(parameters);
-		this.lock = new Object();
-		this.stopped = false;
-	}
 
 	public MinecraftServer(NetworkInterface networkInterface, Stateable world)
 	{
@@ -116,9 +90,6 @@ public class MinecraftServer extends NetworkNode implements Creatable
 			// If chunk is a suitable spawn location, request the chunks around it
 			// Otherwise repeat
 
-		// Begin timed loop
-			// 20 ticks per second
-			// Check if the server is still running by syncing this.lock and checking this.stopped
 		long oldTime = Timer.getTimeInMilliseconds();
 		while (true)
 		{

@@ -37,12 +37,11 @@ import java.util.ListIterator;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import recraft.core.Creatable;
 import recraft.core.NetworkInterface;
 import recraft.core.NetworkNodeIdentifier;
 import recraft.core.Packet;
 
-public class UDPNetworkInterface implements NetworkInterface, Creatable
+public class UDPNetworkInterface implements NetworkInterface
 {
 	private static final int bufferSize = 64 * 1024; // 64kB
 
@@ -54,16 +53,6 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	private Thread listener;
 
 	private Object lock;
-
-	public static UDPNetworkInterface create() throws SocketException
-	{
-		return new UDPNetworkInterface();
-	}
-
-	public static UDPNetworkInterface create(Integer port) throws SocketException
-	{
-		return new UDPNetworkInterface(port.intValue());
-	}
 
 	public UDPNetworkInterface() throws SocketException
 	{

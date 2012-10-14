@@ -31,14 +31,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
-import recraft.core.Configurator;
-import recraft.core.Configurator.ConfiguratorInputDevice;
-import recraft.core.Configurator.ConfiguratorSelect;
-import recraft.core.Creatable;
 import recraft.core.Input;
 import recraft.core.InputDevice;
 
-public class LWJGLKeyboardMouse implements InputDevice, Creatable
+public class LWJGLKeyboardMouse implements InputDevice
 {
 	private List<MouseEvent> mouseEvents;
 	private List<KeyboardEvent> keyboardEvents;
@@ -51,11 +47,6 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		SELECT_ITEM_REL_UP, SELECT_ITEM_REL_DOWN}
 
 	private boolean isReceiving;
-
-	public static LWJGLKeyboardMouse create()
-	{
-		return new LWJGLKeyboardMouse();
-	}
 
 	public LWJGLKeyboardMouse()
 	{
@@ -101,25 +92,6 @@ public class LWJGLKeyboardMouse implements InputDevice, Creatable
 		this.bindings[BindingType.RUN.ordinal()] = new DoubleTapBinding(this.bindings[BindingType.MOVE_FORWARD.ordinal()], 350);
 
 		this.isReceiving = false;
-
-		ConfiguratorSelect select = (ConfiguratorSelect)Configurator.get("Options.Input.Main Input Device");
-		select.addItem(this.getName());
-
-		ConfiguratorInputDevice config = Configurator.addInputDevice("Options.Input.Input Devices", new ConfiguratorInputDevice(this));
-		config.addBinding("Attack", this.bindings[BindingType.ATTACK.ordinal()]);
-		config.addBinding("Use Item", this.bindings[BindingType.USE.ordinal()]);
-		config.addBinding("Forward", this.bindings[BindingType.MOVE_FORWARD.ordinal()]);
-		config.addBinding("Left", this.bindings[BindingType.MOVE_LEFT.ordinal()]);
-		config.addBinding("Back", this.bindings[BindingType.MOVE_BACKWARD.ordinal()]);
-		config.addBinding("Right", this.bindings[BindingType.MOVE_RIGHT.ordinal()]);
-		config.addBinding("Jump", this.bindings[BindingType.JUMP.ordinal()]);
-		config.addBinding("Sneak", this.bindings[BindingType.CROUCH.ordinal()]);
-		config.addBinding("Drop", this.bindings[BindingType.DROP.ordinal()]);
-		config.addBinding("Inventory", this.bindings[BindingType.INVENTORY.ordinal()]);
-		config.addBinding("Chat", this.bindings[BindingType.CHAT.ordinal()]);
-		config.addBinding("List Players", this.bindings[BindingType.LIST_PLAYERS.ordinal()]);
-		config.addBinding("Pick Block", this.bindings[BindingType.PICK_BLOCK.ordinal()]);
-		config.addBinding("Zoom", this.bindings[BindingType.ZOOM.ordinal()]);
 	}
 
 	@Override

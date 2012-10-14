@@ -21,11 +21,8 @@
 
 package recraft.core;
 
-public interface InputDevice extends Creatable
+public interface InputDevice
 {
-	// Create the following method in implementing classes:
-	// public static ImplementingClass create();
-
 	String getName();
 
 	Input getInputState();
