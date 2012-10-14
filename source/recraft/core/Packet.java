@@ -29,24 +29,15 @@ public abstract class Packet implements Serializable
 
 	public static int id = 0;
 
-	protected int tick;
-
-	public Packet(int tick)
-	{
-		this.tick = tick;
-	}
-
 	public int getID() { return id; }
-
-	public int getTick() { return this.tick; }
 
 	public Object open() { return null; }
 
 	@Override
 	public abstract String toString();
 
-	protected static String formatString(int packetID, String packetName, int tick)
+	protected static String formatString(int packetID, String packetName)
 	{
-		return String.format("Packet %d, %s  Tick: %d", packetID, packetName, tick);
+		return String.format("Packet %d, %s", packetID, packetName);
 	}
 }
