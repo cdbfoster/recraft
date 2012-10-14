@@ -21,11 +21,15 @@
 
 package recraft.core;
 
+import recraft.core.NetworkInterface.NodePacketPair;
+
 public interface Stateable
 {
 	void openDeltaState(int tickNumber);
 	DeltaState closeDeltaState();
 	void applyDeltaState(DeltaState deltaState);
+
+	void update(NodePacketPair pair);
 
 	DeltaState requestState(StateRequest request);
 
