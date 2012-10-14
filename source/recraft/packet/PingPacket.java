@@ -23,7 +23,7 @@ package recraft.packet;
 
 import recraft.core.Packet;
 
-public class TestPacket extends Packet
+public class PingPacket extends Packet
 {
 	private static final long serialVersionUID = 4083643734102984081L;
 
