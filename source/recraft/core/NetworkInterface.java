@@ -21,8 +21,8 @@
 
 package recraft.core;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /** Handles sending and receiving of Packets to and from specified network nodes. */
 public interface NetworkInterface extends Creatable
@@ -40,9 +40,9 @@ public interface NetworkInterface extends Creatable
 	boolean sendPacketQueue();
 
 	/** Returns the incoming packet queue in the form of a list of NodePacketPairs.  Synchronize access to the returned list.  Returns null if the interface has been closed. */
-	LinkedList<NodePacketPair> getIncomingPackets();
+	List<NodePacketPair> getIncomingPackets();
 	/** Returns the incoming packet queue in the form of a HashMap of network nodes to lists of packets received by each unique node.  Synchronize access to the returned map.  Returns null if the interface has been closed. */
-	HashMap<NetworkNodeIdentifier, LinkedList<Packet>> getIncomingPacketsMap();
+	Map<NetworkNodeIdentifier, List<Packet>> getIncomingPacketsMap();
 	/** Clear the incoming packet queue */
 	void clearIncomingPackets();
 

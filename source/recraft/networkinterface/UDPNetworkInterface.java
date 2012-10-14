@@ -33,7 +33,9 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -48,9 +50,9 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 	private DatagramSocket socket;
 
-	private LinkedList<NodePacketPair> outgoingPackets;
-	private LinkedList<NodePacketPair> incomingPackets;
-	private HashMap<NetworkNodeIdentifier, LinkedList<Packet>> incomingPacketsMap;
+	private List<NodePacketPair> outgoingPackets;
+	private List<NodePacketPair> incomingPackets;
+	private Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap;
 
 	private Thread listener;
 
@@ -74,7 +76,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
-		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, LinkedList<Packet>>();
+		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, List<Packet>>();
 
 		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
 		this.listener.setDaemon(true);
@@ -91,7 +93,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 
 		this.outgoingPackets = new LinkedList<NodePacketPair>();
 		this.incomingPackets = new LinkedList<NodePacketPair>();
-		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, LinkedList<Packet>>();
+		this.incomingPacketsMap = new HashMap<NetworkNodeIdentifier, List<Packet>>();
 
 		this.listener = new Thread(new Listener(this.socket, this.incomingPackets, this.incomingPacketsMap));
 		this.listener.setDaemon(true);
@@ -150,7 +152,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	}
 
 	@Override
-	public LinkedList<NodePacketPair> getIncomingPackets()
+	public List<NodePacketPair> getIncomingPackets()
 	{
 		synchronized (this.lock)
 		{
@@ -161,7 +163,7 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	}
 
 	@Override
-	public HashMap<NetworkNodeIdentifier, LinkedList<Packet>> getIncomingPacketsMap()
+	public Map<NetworkNodeIdentifier, List<Packet>> getIncomingPacketsMap()
 	{
 		synchronized (this.lock)
 		{
@@ -309,10 +311,10 @@ public class UDPNetworkInterface implements NetworkInterface, Creatable
 	private static class Listener implements Runnable
 	{
 		private DatagramSocket socket;
-		private LinkedList<NodePacketPair> incomingPackets;
-		private HashMap<NetworkNodeIdentifier, LinkedList<Packet>> incomingPacketsMap;
+		private List<NodePacketPair> incomingPackets;
+		private Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap;
 
-		public Listener(DatagramSocket socket, LinkedList<NodePacketPair> incomingPackets, HashMap<NetworkNodeIdentifier, LinkedList<Packet>> incomingPacketsMap)
+		public Listener(DatagramSocket socket, List<NodePacketPair> incomingPackets, Map<NetworkNodeIdentifier, List<Packet>> incomingPacketsMap)
 		{
 			this.socket = socket;
 			this.incomingPackets = incomingPackets;
