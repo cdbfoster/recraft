@@ -32,15 +32,13 @@ public class PlayerJoinRequestPacket extends Packet
 
 	private PlayerJoinRequest request;
 
-	public PlayerJoinRequestPacket(int tick, String playerName)
+	public PlayerJoinRequestPacket(String playerName)
 	{
-		super(tick);
-		this.request = new PlayerJoinRequest(playerName);
+		this(new PlayerJoinRequest(playerName));
 	}
 
-	public PlayerJoinRequestPacket(int tick, PlayerJoinRequest joinRequest)
+	public PlayerJoinRequestPacket(PlayerJoinRequest joinRequest)
 	{
-		super(tick);
 		this.request = joinRequest;
 	}
 
@@ -56,6 +54,6 @@ public class PlayerJoinRequestPacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s\nPlayer: %s", Packet.formatString(id, "PlayerJoinRequest", this.tick), this.request.playerName);
+		return String.format("%s\nPlayer: %s", Packet.formatString(id, "PlayerJoinRequest"), this.request.playerName);
 	}
 }

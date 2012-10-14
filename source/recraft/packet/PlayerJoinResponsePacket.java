@@ -33,15 +33,13 @@ public class PlayerJoinResponsePacket extends Packet
 
 	private PlayerJoinResponse response;
 
-	public PlayerJoinResponsePacket(int tick, ResponseType responseType, String message)
+	public PlayerJoinResponsePacket(ResponseType responseType, String message)
 	{
-		super(tick);
-		this.response = new PlayerJoinResponse(responseType, message);
+		this(new PlayerJoinResponse(responseType, message));
 	}
 
-	public PlayerJoinResponsePacket(int tick, PlayerJoinResponse joinResponse)
+	public PlayerJoinResponsePacket(PlayerJoinResponse joinResponse)
 	{
-		super(tick);
 		this.response = joinResponse;
 	}
 
@@ -57,6 +55,6 @@ public class PlayerJoinResponsePacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s\nServer Response: %s", Packet.formatString(id, "PlayerJoinResponse", this.tick), this.response.message);
+		return String.format("%s\nServer Response: %s", Packet.formatString(id, "PlayerJoinResponse"), this.response.message);
 	}
 }

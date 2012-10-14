@@ -33,15 +33,13 @@ public class PlayerJoinPacket extends Packet
 
 	private PlayerJoin playerJoin;
 
-	public PlayerJoinPacket(int tick, String playerName, NetworkNodeIdentifier clientNode)
+	public PlayerJoinPacket(String playerName, NetworkNodeIdentifier clientNode)
 	{
-		super(tick);
-		this.playerJoin = new PlayerJoin(playerName, clientNode);
+		this(new PlayerJoin(playerName, clientNode));
 	}
 
-	public PlayerJoinPacket(int tick, PlayerJoin join)
+	public PlayerJoinPacket(PlayerJoin join)
 	{
-		super(tick);
 		this.playerJoin = join;
 	}
 
@@ -57,7 +55,7 @@ public class PlayerJoinPacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s\nPlayer Joined: %s", Packet.formatString(id, "PlayerJoin", this.tick), this.playerJoin.playerName);
+		return String.format("%s\nPlayer Joined: %s", Packet.formatString(id, "PlayerJoin"), this.playerJoin.playerName);
 	}
 
 }

@@ -26,13 +26,8 @@ import recraft.core.Packet;
 public class TestPacket extends Packet
 {
 	private static final long serialVersionUID = 4083643734102984081L;
-	
-	public static int id = 0;
 
-	public TestPacket(int tick)
-	{
-		super(tick);
-	}
+	public static int id = 0;
 
 	@Override
 	public int getID() { return id; }
@@ -40,12 +35,12 @@ public class TestPacket extends Packet
 	@Override
 	public Object open()
 	{
-		return new Integer(this.tick);
+		return null;
 	}
 
 	@Override
 	public String toString()
 	{
-		return formatString(id, "Test", this.tick);
+		return formatString(id, "Test");
 	}
 }

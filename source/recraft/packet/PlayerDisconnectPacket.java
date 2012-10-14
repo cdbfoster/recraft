@@ -33,15 +33,13 @@ public class PlayerDisconnectPacket extends Packet
 
 	private PlayerDisconnect playerDisconnect;
 
-	public PlayerDisconnectPacket(int tick, String playerName, NetworkNodeIdentifier clientNode)
+	public PlayerDisconnectPacket(String playerName, NetworkNodeIdentifier clientNode)
 	{
-		super(tick);
-		this.playerDisconnect = new PlayerDisconnect(playerName, clientNode);
+		this(new PlayerDisconnect(playerName, clientNode));
 	}
 
-	public PlayerDisconnectPacket(int tick, PlayerDisconnect disconnect)
+	public PlayerDisconnectPacket(PlayerDisconnect disconnect)
 	{
-		super(tick);
 		this.playerDisconnect = disconnect;
 	}
 
@@ -57,7 +55,7 @@ public class PlayerDisconnectPacket extends Packet
 	@Override
 	public String toString()
 	{
-		return String.format("%s\nPlayer Disconnected: %s", Packet.formatString(id, "PlayerDisconnect", this.tick), this.playerDisconnect.playerName);
+		return String.format("%s\nPlayer Disconnected: %s", Packet.formatString(id, "PlayerDisconnect"), this.playerDisconnect.playerName);
 	}
 
 }
