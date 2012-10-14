@@ -56,11 +56,20 @@ public interface NetworkInterface extends Creatable
 	{
 		public final NetworkNodeIdentifier node;
 		public final Packet packet;
+		public final long time;
 
 		public NodePacketPair(NetworkNodeIdentifier node, Packet packet)
 		{
 			this.node = node;
 			this.packet = packet;
+			this.time = Timer.getTimeInMilliseconds();
+		}
+
+		public NodePacketPair(NetworkNodeIdentifier node, Packet packet, long time)
+		{
+			this.node = node;
+			this.packet = packet;
+			this.time = time;
 		}
 
 		@Override
