@@ -37,6 +37,7 @@ import recraft.core.NetworkNodeIdentifier;
 import recraft.core.Stateable;
 import recraft.core.Timer;
 import recraft.packet.PingPacket;
+import recraft.packet.PlayerJoinRequestPacket;
 
 public class MinecraftServer extends NetworkNode
 {
@@ -54,7 +55,7 @@ public class MinecraftServer extends NetworkNode
 	protected NetworkNodeIdentifier localAddress;
 
 	protected LinkedList<DeltaState> reverseWorldStates;
-	private List<NodePacketPair> clientInputPackets;
+	protected List<NodePacketPair> clientInputPackets;
 
 	protected ClientMap<MinecraftServerClient> clients;
 	protected ClientMap<MinecraftServerClient> clientStaging;
@@ -115,7 +116,17 @@ public class MinecraftServer extends NetworkNode
 			for (int i = 0; i < elapsedTicks; i++)
 			{
 				if ((this.tick % Timer.getTicksPerSecond()) == 0)
-					System.out.println(this.tick / Timer.getTicksPerSecond());
+				{
+					//System.out.println(this.tick / Timer.getTicksPerSecond());
+					Collection<MinecraftServerClient> clientList = this.clientStaging.getClientList();
+					Iterator<MinecraftServerClient> clientIterator = clientList.iterator();
+					while (clientIterator.hasNext())
+					{
+						MinecraftServerClient client = clientIterator.next();
+						System.out.println(client.packetLatency);
+					}
+
+				}
 
 				this.sendClientLatencyTests();
 
@@ -199,6 +210,9 @@ public class MinecraftServer extends NetworkNode
 
 	protected void filterClientLatencyTestResponse(NodePacketPair pair)
 	{
+		if (!(pair.packet instanceof PingPacket))
+			return;
+
 		MinecraftServerClient client = this.clients.get(pair.node);
 
 		if (client != null)
@@ -214,7 +228,14 @@ public class MinecraftServer extends NetworkNode
 
 	protected void filterJoin(NodePacketPair pair)
 	{
+		if (!(pair.packet instanceof PlayerJoinRequestPacket))
+			return;
 
+		if (this.clientStaging.get(pair.node) != null)
+			return;
+
+		System.out.println(pair.packet);
+		this.clientStaging.put(pair.node, new MinecraftServerClient(this, pair.node, this.tick));
 	}
 
 	protected void filterLeave(NodePacketPair pair)

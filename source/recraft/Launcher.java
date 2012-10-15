@@ -21,58 +21,92 @@
 
 package recraft;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.*;
-import java.util.*;
-
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-
-import math.Matrix;
-import math.Ray;
-import math.Vector;
-
-import recraft.core.*;
-import recraft.core.Configurator.ConfiguratorCreatable;
-import recraft.core.Configurator.ConfiguratorSelect;
 import recraft.core.NetworkInterface;
-import recraft.core.NetworkInterface.NodePacketPair;
 import recraft.networkinterface.UDPNetworkInterface;
 import recraft.networknode.MinecraftServer;
-import recraft.packet.InputPacket;
-import recraft.packet.TestPacket;
-import recraft.polyhedron.AABB;
+import recraft.stateable.world.MinecraftWorld;
+
+
 
 public class Launcher
 {
 
 	public static void main(String[] args) throws Exception
 	{
-		/*
-		// TODO Make log class, start on world/population and the control thereof (start with input device)
-		
-		/*/
-		MinecraftServer server = new MinecraftServer();
+		//*
+		System.out.println("Starting server...");
+		MinecraftWorld world = null;
+		NetworkInterface serverNetwork = new UDPNetworkInterface(25565);
+		MinecraftServer server = new MinecraftServer(serverNetwork, world);
+
 		Thread serverThread = new Thread(server);
 		serverThread.start();
-		
-		ConfiguratorCreatable interfaceCreator = (ConfiguratorCreatable)((ConfiguratorSelect)Configurator.get("Options.Network.Network Interface")).getValue();
-		NetworkInterface clientInterface = (NetworkInterface)interfaceCreator.create(null);
+		/*/
+		System.out.println("Starting client...");
+		NetworkInterface clientNetwork = new UDPNetworkInterface();
+		MinecraftClient client = new MinecraftClient(clientNetwork);
 
-		for (int i = 0; i < 20; i++)
-		{
-			Packet packet = new TestPacket(i);
-			clientInterface.sendPacket(new NetworkNodeIdentifier("127.0.0.1", 25565), packet);
-		}
-		
+		Thread clientThread = new Thread(client);
+		clientThread.start();
+
 		Thread.sleep(500);
 
-		clientInterface.close();
+		System.out.println("Attempting to join server...");
+		client.join(new NetworkNodeIdentifier("192.168.1.65", 25565));
+		//*/
+
+		Thread.sleep(100000);
+
+		//*
 		server.stop();
 		serverThread.join();
+		serverNetwork.close();
+		/*/
+		client.stop();
+		clientThread.join();
+		clientNetwork.close();
 		//*/
+		/*
+
+		ConvexPolyhedronCollisionShape aabb = new AABBCollisionShape(new Vector(-10, -10, -10), new Vector(10, 10, 10));
+		CollisionObject a = new CollisionObject(aabb);
+		CollisionObject b = new CollisionObject(aabb);
+
+		a.rotate(0.0f, 0.0f, (float)Math.toRadians(45.0d));
+		a.translate((float)(10.0f * Math.sqrt(2.0f)), 0, 0);
+		//a.rotate((float)Math.toRadians(45.0d), 0.0f, 0.0f);
+		//a.translate((float)(10.0f * Math.sqrt(2.0f)), 0, 0);
+		//b.rotate(0, 0, (float)Math.toRadians(45.0d));
+
+		//System.out.println(aabb.getGreatestPointAlongAxis(a.getTransform(), new Vector(1.0f, 0.0f, 0.0f), null));
+		//*
+		CollisionResult result = CollisionDetector.detectCollision(a, b);
+		if (result != null)
+		{
+			System.out.println(result.a);
+			System.out.println(result.b);
+			System.out.println(result.point.localPointA);
+			System.out.println(result.point.localPointB);
+			System.out.println(result.point.worldNormalB);
+			System.out.println(result.point.worldPointA);
+			System.out.println(result.point.worldPointB);
+		}
+		else
+		{
+			System.out.println("No collision");
+		}
+		//*/
+
+
+		/*          7
+		 * 3                    6
+		 *             2
+		 *
+		 *
+		 *
+		 *          5
+		 * 1                    4
+		 *             0
+		 */
 	}
 }
